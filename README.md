@@ -1,38 +1,70 @@
-# sv
+# 英単語 SRS 学習アプリ
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+忘却曲線と SRS（Spaced Repetition System）に基づいて英単語を学習するWebアプリケーションです。
 
-## Creating a project
+## 特徴
 
-If you're seeing this, you've probably already done this step. Congrats!
+- **SRS（間隔反復）学習**: SM-2アルゴリズムベースで最適なタイミングで復習
+- **5単語1セット制**: 効率的な学習フロー
+- **完全オフライン**: バックエンド不要、ブラウザのlocalStorageのみで動作
+- **音声再生**: Web Speech APIによる発音確認
+- **学習分析**: 詳細なレポートとストリーク機能
 
-```sh
-# create a new project in the current directory
-npx sv create
+## 技術スタック
 
-# create a new project in my-app
-npx sv create my-app
-```
+- **フロントエンド**: SvelteKit
+- **ストレージ**: localStorage
+- **音声**: Web Speech API
+- **対象環境**: Chrome（最新版）、スマートフォン対応
 
-## Developing
+## ドキュメント
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+プロジェクトの詳細なドキュメントは以下を参照してください：
 
-```sh
+- **[要件定義書](docs/REQUIREMENTS.md)** - アプリの機能要件、画面構成、非機能要件
+- **[設計書](docs/DESIGN.md)** - 技術スタック、データモデル、アルゴリズム、実装詳細
+- **[開発ロードマップ](docs/ROADMAP.md)** - 開発優先順位、フェーズ計画
+
+## 開発
+
+### セットアップ
+
+```bash
+# 依存関係のインストール
+npm install
+
+# 開発サーバーの起動
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
 
-## Building
+### ビルド
 
-To create a production version of your app:
-
-```sh
+```bash
+# 本番ビルド
 npm run build
+
+# ビルドのプレビュー
+npm run preview
 ```
 
-You can preview the production build with `npm run preview`.
+### 単語データのバリデーション
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+```bash
+npm run validate-words ./data/basic.json
+```
+
+## プロジェクト構成
+
+```
+english_learn_app/
+├── docs/                  # ドキュメント
+│   ├── REQUIREMENTS.md   # 要件定義書
+│   └── DESIGN.md         # 設計書
+├── src/                  # ソースコード
+├── data/                 # 単語データ（JSON）
+└── README.md            # このファイル
+```
+
+## ライセンス
+
+（ライセンス情報を記載）
