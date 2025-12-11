@@ -174,6 +174,7 @@ src/
  * @property {number} correctCount - Forgot 以外の回答数
  * @property {number} wrongCount - Forgot の回数
  * @property {number} totalStudyTimeSec - 累計学習時間（秒）
+ * @property {boolean} isMastered - Perfect を選択してマスター済みかどうか
  */
 
 /**
@@ -318,11 +319,7 @@ src/
 ```javascript
 import { writable, derived } from 'svelte/store';
 
-/**
- * @typedef {import('./types').WordData} WordData
- * @typedef {import('./types').WordsConfig} WordsConfig
- * @typedef {import('./types').WordsState} WordsState
- */
+// 型定義は同じファイル内で定義済み（上記の WordData, WordsConfig, WordsState を参照）
 
 /** @type {import('svelte/store').Writable<WordsState>} */
 export const wordsStore = writable({
@@ -362,10 +359,7 @@ export function validateWords() {
 ```javascript
 import { writable } from 'svelte/store';
 
-/**
- * @typedef {import('./types').ProgressMap} ProgressMap
- * @typedef {import('./types').WordProgress} WordProgress
- */
+// 型定義は同じファイル内で定義済み（上記の ProgressMap, WordProgress を参照）
 
 /** @type {import('svelte/store').Writable<ProgressMap>} */
 export const progressStore = writable({});
@@ -413,10 +407,7 @@ export function get(word) {
 ```javascript
 import { writable, derived } from 'svelte/store';
 
-/**
- * @typedef {import('./types').StudySession} StudySession
- * @typedef {import('./types').SessionState} SessionState
- */
+// 型定義は同じファイル内で定義済み（上記の StudySession, SessionState を参照）
 
 /** @type {import('svelte/store').Writable<SessionState>} */
 export const sessionStore = writable({
@@ -466,9 +457,7 @@ export function updateSession(studyCount) {
 ```javascript
 import { writable } from 'svelte/store';
 
-/**
- * @typedef {import('./types').StudyStats} StudyStats
- */
+// 型定義は同じファイル内で定義済み（上記の StudyStats を参照）
 
 /** @type {import('svelte/store').Writable<StudyStats>} */
 export const statsStore = writable({
@@ -521,8 +510,8 @@ export const STORAGE_KEYS = {
 import { STORAGE_KEYS } from './index.js';
 
 /**
- * @typedef {import('../stores/progress').ProgressMap} ProgressMap
- * @typedef {import('../stores/progress').WordProgress} WordProgress
+ * @typedef {import('../stores/progress.js').ProgressMap} ProgressMap
+ * @typedef {import('../stores/progress.js').WordProgress} WordProgress
  */
 
 export const progressStorage = {
@@ -586,9 +575,7 @@ export const progressStorage = {
 ```javascript
 import { STORAGE_KEYS } from './index.js';
 
-/**
- * @typedef {import('./types').StudyLog} StudyLog
- */
+// 型定義は同じファイル内で定義済み（上記の Rating, StudyLog を参照）
 
 export const logsStorage = {
   /**
@@ -649,7 +636,7 @@ export const logsStorage = {
 
 ```javascript
 /**
- * @typedef {import('../stores/session').StudySession} StudySession
+ * @typedef {import('../stores/session.js').StudySession} StudySession
  */
 
 export const sessionsStorage = {
@@ -686,7 +673,7 @@ export const sessionsStorage = {
 
 ```javascript
 /**
- * @typedef {import('../stores/stats').StudyStats} StudyStats
+ * @typedef {import('../stores/stats.js').StudyStats} StudyStats
  */
 
 export const statsStorage = {
@@ -757,9 +744,9 @@ npm install fsrs
 import { FSRS, Rating, State } from 'fsrs';
 
 /**
- * @typedef {import('../stores/progress').WordProgress} WordProgress
- * @typedef {import('../stores/progress').FSRSState} FSRSState
- * @typedef {import('../storage/logs').Rating} Rating
+ * @typedef {import('../stores/progress.js').WordProgress} WordProgress
+ * @typedef {import('../stores/progress.js').FSRSState} FSRSState
+ * @typedef {import('../storage/logs.js').Rating} Rating
  */
 
 /**
@@ -853,7 +840,8 @@ export class StudyScheduler {
         due: nextCard.due.getTime(),
         correctCount: rating !== 'forgot' ? 1 : 0,
         wrongCount: rating === 'forgot' ? 1 : 0,
-        totalStudyTimeSec: 0
+        totalStudyTimeSec: 0,
+        isMastered: rating === 'perfect'
       };
     }
 
@@ -885,7 +873,8 @@ export class StudyScheduler {
       lastReview: nextCard.last_review?.getTime() || now.getTime(),
       due: nextCard.due.getTime(),
       correctCount: currentProgress.correctCount + (rating !== 'forgot' ? 1 : 0),
-      wrongCount: currentProgress.wrongCount + (rating === 'forgot' ? 1 : 0)
+      wrongCount: currentProgress.wrongCount + (rating === 'forgot' ? 1 : 0),
+      isMastered: currentProgress.isMastered || rating === 'perfect'
     };
   }
 }
@@ -902,11 +891,12 @@ export const scheduler = new StudyScheduler();
 
 ```javascript
 /**
- * @typedef {import('../stores/words').WordData} WordData
- * @typedef {import('../stores/progress').WordProgress} WordProgress
- * @typedef {import('../stores/progress').ProgressMap} ProgressMap
- * @typedef {import('./types').StudySet} StudySet
+ * @typedef {import('../stores/words.js').WordData} WordData
+ * @typedef {import('../stores/progress.js').WordProgress} WordProgress
+ * @typedef {import('../stores/progress.js').ProgressMap} ProgressMap
  */
+
+// 型定義は同じファイル内で定義済み（上記の StudySet を参照）
 
 export class StudyQueue {
   /**
@@ -1088,7 +1078,7 @@ export let setProgress;
 
 ```javascript
 /**
- * @typedef {import('../stores/words').WordData} WordData
+ * @typedef {import('../stores/words.js').WordData} WordData
  */
 
 /**
@@ -1314,6 +1304,7 @@ FSRSアルゴリズムで使用するパラメータを含む進捗情報：
 - `correctCount`: `Forgot` 以外の回答数
 - `wrongCount`: `Forgot` の回数
 - `totalStudyTimeSec`: その単語に費やした累計秒数
+- `isMastered`: Perfect を選択してマスター済みかどうか
 
 ### 学習ログ（レポート用）
 
@@ -1425,6 +1416,61 @@ window.speechSynthesis.speak(utterance);
 - カード表示時に `shownAt` をタイムスタンプで記録
 - 回答ボタンクリック時に `timeSpentSec = now - shownAt` を計算
 - 学習ログと進捗データの両方に反映
+
+### Report画面の状態マッピング
+
+Report画面では、FSRS内部の状態を以下のようにユーザー向けの表示状態にマッピングします。
+
+**表示用の状態:**
+
+| 表示状態 | 定義 |
+|---------|------|
+| `Mastered` | `isMastered === true` の単語 |
+| `Stable` | `state === 'Review'` かつ `scheduledDays >= 30` の単語 |
+| `Learning` | `state === 'Learning'` または `state === 'Relearning'` の単語 |
+| `New` | `state === 'New'` の単語 |
+
+**実装例:**
+
+```javascript
+/**
+ * @typedef {import('../stores/progress.js').WordProgress} WordProgress
+ */
+
+/**
+ * 表示用の状態
+ * @typedef {'Mastered' | 'Stable' | 'Learning' | 'New'} DisplayState
+ */
+
+/**
+ * FSRS の状態を表示用の状態に変換
+ * @param {WordProgress} progress - 単語の進捗情報
+ * @returns {DisplayState} 表示用の状態
+ */
+function getDisplayState(progress) {
+  // マスター済み
+  if (progress.isMastered) {
+    return 'Mastered';
+  }
+
+  // 安定状態（長期記憶）
+  if (progress.state === 'Review' && progress.scheduledDays >= 30) {
+    return 'Stable';
+  }
+
+  // 学習中
+  if (progress.state === 'Learning' || progress.state === 'Relearning') {
+    return 'Learning';
+  }
+
+  // 未学習
+  return 'New';
+}
+```
+
+**注意:**
+- FSRS内部では「Review」という状態を使用しますが、ユーザー向けには「Study（学習）」と表記します
+- 技術的な状態（FSRS State）とユーザー向けの表示状態は明確に区別します
 
 ### データのインポート/エクスポート
 
