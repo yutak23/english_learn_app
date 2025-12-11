@@ -11,6 +11,12 @@
   - 選定理由: シンプルで高速、静的サイト生成が容易
   - CLI: `sv` で作成
 
+### 言語
+- **JavaScript**: ESModule形式
+- **型定義**: JSDoc による型アノテーション
+  - TypeScriptファイル（`.ts`）は使用しない
+  - JSDocコメントでランタイム型チェックとエディタ補完を提供
+
 ### データ管理
 - **データソース**: 複数の JSON ファイル（フロントエンドで読み込み）
 - **永続化**: localStorage のみ（バックエンド不要）
@@ -50,29 +56,31 @@ src/
 │   │   ├── ProgressIndicator.svelte
 │   │   └── ...
 │   ├── stores/          # Svelteストア（状態管理）
-│   │   ├── words.ts
-│   │   ├── progress.ts
-│   │   ├── session.ts
-│   │   └── stats.ts
+│   │   ├── words.js
+│   │   ├── progress.js
+│   │   ├── session.js
+│   │   └── stats.js
 │   ├── services/        # ビジネスロジック
-│   │   ├── scheduler.ts # FSRS統合
-│   │   ├── studyQueue.ts # 出題管理
-│   │   └── speech.ts    # 音声再生
+│   │   ├── scheduler.js # FSRS統合
+│   │   ├── studyQueue.js # 出題管理
+│   │   └── speech.js    # 音声再生
 │   ├── storage/         # localStorage操作
-│   │   ├── index.ts     # 統合API
-│   │   ├── progress.ts
-│   │   ├── logs.ts
-│   │   └── sessions.ts
-│   ├── types/           # TypeScript型定義
-│   │   └── index.ts
+│   │   ├── index.js     # 統合API
+│   │   ├── progress.js
+│   │   ├── logs.js
+│   │   └── sessions.js
 │   └── utils/           # ユーティリティ
-│       ├── validator.ts
-│       ├── time.ts
-│       └── date.ts
+│       ├── validator.js
+│       ├── time.js
+│       └── date.js
 ├── data/                # 単語データ（JSON）
 │   └── basic.json
 └── static/              # 静的アセット
 ```
+
+**注意:**
+- `src/lib/types/` ディレクトリは作成しない
+- 型定義は各ファイルで JSDoc として記述
 
 ### レイヤー構成
 
@@ -90,154 +98,185 @@ src/
 
 ---
 
-## TypeScript 型定義
+## JSDoc 型定義
 
-### 単語データ
+### 共通型定義の配置
 
-```typescript
-// src/lib/types/index.ts
+型定義は各ファイルの先頭で `@typedef` を使用して定義します。
+共通で使用する型は以下のファイルに記載します：
 
+- `src/lib/stores/words.js` - WordData, WordsConfig
+- `src/lib/stores/progress.js` - WordProgress, ProgressMap, FSRSState
+- `src/lib/stores/session.js` - StudySession
+- `src/lib/stores/stats.js` - StudyStats
+- `src/lib/services/studyQueue.js` - StudySet, CurrentStudy
+
+### 単語データ型定義
+
+**src/lib/stores/words.js:**
+
+```javascript
 /**
  * JSON から読み込む単語データ
+ * @typedef {Object} WordData
+ * @property {string} word - 必須: 英単語（一意な識別子）
+ * @property {string} meaning - 必須: 日本語の意味
+ * @property {string} [pronunciation] - 発音記号
+ * @property {string} [katakana] - カタカナ読み
+ * @property {string} [type] - 品詞
+ * @property {string} [contextMeaning] - 文脈での意味
+ * @property {string} [example] - 例文
+ * @property {string} [translation] - 例文の訳
+ * @property {string} [sentenceBreakdown] - 文の構造解析
+ * @property {string} [wordByWordTranslation] - 単語ごとの訳
+ * @property {string[]} [derivatives] - 派生語リスト
  */
-export interface WordData {
-  word: string;                    // 必須: 英単語（一意な識別子）
-  meaning: string;                 // 必須: 日本語の意味
-  pronunciation?: string;          // 発音記号
-  katakana?: string;              // カタカナ読み
-  type?: string;                  // 品詞
-  contextMeaning?: string;        // 文脈での意味
-  example?: string;               // 例文
-  translation?: string;           // 例文の訳
-  sentenceBreakdown?: string;     // 文の構造解析
-  wordByWordTranslation?: string; // 単語ごとの訳
-  derivatives?: string[];         // 派生語リスト
-}
 
 /**
  * 単語設定ファイル
+ * @typedef {Object} WordsConfig
+ * @property {string[]} wordFiles - 読み込む単語ファイルのパス
  */
-export interface WordsConfig {
-  wordFiles: string[];
-}
+
+/**
+ * 単語ストアの状態
+ * @typedef {Object} WordsState
+ * @property {WordData[]} words - 単語データの配列
+ * @property {boolean} loading - 読み込み中かどうか
+ * @property {string | null} error - エラーメッセージ
+ */
 ```
 
-### 学習進捗
+### 学習進捗型定義
 
-```typescript
+**src/lib/stores/progress.js:**
+
+```javascript
 /**
  * FSRS の状態
+ * @typedef {'New' | 'Learning' | 'Review' | 'Relearning'} FSRSState
  */
-export type FSRSState = 'New' | 'Learning' | 'Review' | 'Relearning';
 
 /**
  * 単語ごとの進捗情報
+ * @typedef {Object} WordProgress
+ * @property {string} word - 単語（識別子）
+ * @property {FSRSState} state - FSRS の状態
+ * @property {number} stability - 記憶の安定性（日数）
+ * @property {number} difficulty - 難易度（0-10）
+ * @property {number} retrievability - 想起可能性（0-1）
+ * @property {number} elapsedDays - 最後の復習からの経過日数
+ * @property {number} scheduledDays - 次回復習までの予定日数
+ * @property {number} reps - 復習回数
+ * @property {number} lapses - 忘れた回数
+ * @property {number} lastReview - 最終学習時刻（タイムスタンプ）
+ * @property {number} due - 次回出題時刻（タイムスタンプ）
+ * @property {number} correctCount - Forgot 以外の回答数
+ * @property {number} wrongCount - Forgot の回数
+ * @property {number} totalStudyTimeSec - 累計学習時間（秒）
  */
-export interface WordProgress {
-  word: string;                    // 単語（識別子）
-  state: FSRSState;               // FSRS の状態
-  stability: number;              // 記憶の安定性（日数）
-  difficulty: number;             // 難易度（0-10）
-  retrievability: number;         // 想起可能性（0-1）
-  elapsedDays: number;            // 最後の復習からの経過日数
-  scheduledDays: number;          // 次回復習までの予定日数
-  reps: number;                   // 復習回数
-  lapses: number;                 // 忘れた回数
-  lastReview: number;             // 最終学習時刻（タイムスタンプ）
-  due: number;                    // 次回出題時刻（タイムスタンプ）
-  correctCount: number;           // Forgot 以外の回答数
-  wrongCount: number;             // Forgot の回数
-  totalStudyTimeSec: number;      // 累計学習時間（秒）
-}
 
 /**
  * 進捗データのマップ（word をキーとする）
+ * @typedef {Record<string, WordProgress>} ProgressMap
  */
-export type ProgressMap = Record<string, WordProgress>;
 ```
 
-### 学習ログとセッション
+### 学習ログとセッション型定義
 
-```typescript
+**src/lib/storage/logs.js:**
+
+```javascript
 /**
  * ユーザーの評価
+ * @typedef {'forgot' | 'remembered' | 'perfect'} Rating
  */
-export type Rating = 'forgot' | 'remembered' | 'perfect';
 
 /**
  * 学習ログ
+ * @typedef {Object} StudyLog
+ * @property {string} word - 単語
+ * @property {number} timestamp - 学習時刻
+ * @property {Rating} rating - 評価
+ * @property {number} timeSpentSec - 回答時間（秒）
+ * @property {FSRSState} state - 学習時の状態
  */
-export interface StudyLog {
-  word: string;          // 単語
-  timestamp: number;     // 学習時刻
-  rating: Rating;        // 評価
-  timeSpentSec: number;  // 回答時間（秒）
-  state: FSRSState;      // 学習時の状態
-}
+```
 
+**src/lib/stores/session.js:**
+
+```javascript
 /**
  * 学習セッション
+ * @typedef {Object} StudySession
+ * @property {string} id - セッション ID
+ * @property {number} startAt - 開始時刻
+ * @property {number | null} endAt - 終了時刻（学習中は null）
+ * @property {number} totalActiveSec - 総学習時間（秒）
+ * @property {number} studyCount - 学習した単語数
  */
-export interface StudySession {
-  id: string;            // セッション ID
-  startAt: number;       // 開始時刻
-  endAt: number | null;  // 終了時刻（学習中は null）
-  totalActiveSec: number; // 総学習時間（秒）
-  studyCount: number;    // 学習した単語数
-}
+
+/**
+ * セッションストアの状態
+ * @typedef {Object} SessionState
+ * @property {StudySession | null} current - 現在のセッション
+ * @property {boolean} isActive - アクティブかどうか
+ */
 ```
 
-### 統計情報
+### 統計情報型定義
 
-```typescript
+**src/lib/stores/stats.js:**
+
+```javascript
 /**
  * 学習統計情報
+ * @typedef {Object} StudyStats
+ * @property {number} currentStreak - 現在の連続学習日数
+ * @property {number} longestStreak - 最長の連続学習日数
+ * @property {number} totalStudies - 総学習回数
+ * @property {string} lastStudyDate - 最後に学習した日付（YYYY-MM-DD）
  */
-export interface StudyStats {
-  currentStreak: number;  // 現在の連続学習日数
-  longestStreak: number;  // 最長の連続学習日数
-  totalStudies: number;   // 総学習回数
-  lastStudyDate: string;  // 最後に学習した日付（YYYY-MM-DD）
-}
 ```
 
-### 学習フロー
+### 学習フロー型定義
 
-```typescript
+**src/lib/services/studyQueue.js:**
+
+```javascript
 /**
  * 学習セット（5単語1セット）
+ * @typedef {Object} StudySet
+ * @property {string[]} words - セット内の単語リスト
+ * @property {Set<string>} completedWords - 完了した単語（Remembered または Perfect）
+ * @property {Set<string>} forgotWords - Forgot を選択した単語
  */
-export interface StudySet {
-  words: string[];              // セット内の単語リスト
-  completedWords: Set<string>;  // 完了した単語（Remembered または Perfect）
-  forgotWords: Set<string>;     // Forgot を選択した単語
-}
 
 /**
  * 現在学習中の単語情報
+ * @typedef {Object} CurrentStudy
+ * @property {string} word - 単語
+ * @property {WordData} wordData - 単語データ
+ * @property {WordProgress} progress - 進捗情報
+ * @property {number} shownAt - 表示開始時刻
+ * @property {boolean} meaningVisible - 意味の表示/非表示
  */
-export interface CurrentStudy {
-  word: string;           // 単語
-  wordData: WordData;     // 単語データ
-  progress: WordProgress; // 進捗情報
-  shownAt: number;        // 表示開始時刻
-  meaningVisible: boolean; // 意味の表示/非表示
-}
 ```
 
-### エクスポート/インポート
+### エクスポート/インポート型定義
 
-```typescript
+**src/lib/storage/index.js:**
+
+```javascript
 /**
  * エクスポートデータ形式
+ * @typedef {Object} ExportData
+ * @property {string} exportedAt - エクスポート日時（ISO 8601）
+ * @property {ProgressMap} progress - 進捗データ
+ * @property {StudyLog[]} studyLogs - 学習ログ
+ * @property {StudySession[]} sessions - セッション情報
+ * @property {StudyStats} stats - 統計情報
  */
-export interface ExportData {
-  exportedAt: string;                    // エクスポート日時（ISO 8601）
-  progress: ProgressMap;                 // 進捗データ
-  studyLogs: StudyLog[];                 // 学習ログ
-  sessions: StudySession[];              // セッション情報
-  stats: StudyStats;                     // 統計情報
-}
 ```
 
 ---
@@ -272,21 +311,21 @@ export interface ExportData {
 
 ## 状態管理設計（Svelte Stores）
 
-### 1. wordsStore (`src/lib/stores/words.ts`)
+### 1. wordsStore (`src/lib/stores/words.js`)
 
 **責務:** 単語データの管理
 
-```typescript
+```javascript
 import { writable, derived } from 'svelte/store';
-import type { WordData } from '$lib/types';
 
-interface WordsState {
-  words: WordData[];
-  loading: boolean;
-  error: string | null;
-}
+/**
+ * @typedef {import('./types').WordData} WordData
+ * @typedef {import('./types').WordsConfig} WordsConfig
+ * @typedef {import('./types').WordsState} WordsState
+ */
 
-export const wordsStore = writable<WordsState>({
+/** @type {import('svelte/store').Writable<WordsState>} */
+export const wordsStore = writable({
   words: [],
   loading: false,
   error: null
@@ -297,45 +336,90 @@ export const wordsMap = derived(
   wordsStore,
   ($words) => new Map($words.words.map(w => [w.word, w]))
 );
+
+/**
+ * 単語データを読み込む
+ * @param {WordsConfig} config - 単語ファイルの設定
+ * @returns {Promise<void>}
+ */
+export async function loadWords(config) {
+  // 実装
+}
+
+/**
+ * 単語データのバリデーション
+ * @returns {boolean}
+ */
+export function validateWords() {
+  // 実装
+}
 ```
 
-**主要メソッド:**
-- `loadWords(config: WordsConfig): Promise<void>` - 単語データを読み込む
-- `validateWords(): boolean` - 単語データのバリデーション
-
-### 2. progressStore (`src/lib/stores/progress.ts`)
+### 2. progressStore (`src/lib/stores/progress.js`)
 
 **責務:** 学習進捗の管理
 
-```typescript
+```javascript
 import { writable } from 'svelte/store';
-import type { ProgressMap, WordProgress } from '$lib/types';
 
-export const progressStore = writable<ProgressMap>({});
+/**
+ * @typedef {import('./types').ProgressMap} ProgressMap
+ * @typedef {import('./types').WordProgress} WordProgress
+ */
 
-// 主要メソッド
-export const progressActions = {
-  load: () => { /* localStorage から読み込み */ },
-  save: () => { /* localStorage に保存 */ },
-  update: (word: string, progress: WordProgress) => { /* 進捗更新 */ },
-  get: (word: string): WordProgress | null => { /* 進捗取得 */ }
-};
+/** @type {import('svelte/store').Writable<ProgressMap>} */
+export const progressStore = writable({});
+
+/**
+ * localStorage から進捗データを読み込む
+ * @returns {void}
+ */
+export function load() {
+  // 実装
+}
+
+/**
+ * localStorage に進捗データを保存
+ * @returns {void}
+ */
+export function save() {
+  // 実装
+}
+
+/**
+ * 単語の進捗を更新
+ * @param {string} word - 単語
+ * @param {WordProgress} progress - 進捗情報
+ * @returns {void}
+ */
+export function update(word, progress) {
+  // 実装
+}
+
+/**
+ * 単語の進捗を取得
+ * @param {string} word - 単語
+ * @returns {WordProgress | null}
+ */
+export function get(word) {
+  // 実装
+}
 ```
 
-### 3. sessionStore (`src/lib/stores/session.ts`)
+### 3. sessionStore (`src/lib/stores/session.js`)
 
 **責務:** 学習セッションの管理
 
-```typescript
+```javascript
 import { writable, derived } from 'svelte/store';
-import type { StudySession } from '$lib/types';
 
-interface SessionState {
-  current: StudySession | null;
-  isActive: boolean;
-}
+/**
+ * @typedef {import('./types').StudySession} StudySession
+ * @typedef {import('./types').SessionState} SessionState
+ */
 
-export const sessionStore = writable<SessionState>({
+/** @type {import('svelte/store').Writable<SessionState>} */
+export const sessionStore = writable({
   current: null,
   isActive: false
 });
@@ -348,32 +432,69 @@ export const activeTime = derived(
     return Math.floor((Date.now() - $session.current.startAt) / 1000);
   }
 );
+
+/**
+ * セッション開始
+ * @returns {void}
+ */
+export function startSession() {
+  // 実装
+}
+
+/**
+ * セッション終了
+ * @returns {void}
+ */
+export function endSession() {
+  // 実装
+}
+
+/**
+ * セッション情報更新
+ * @param {number} studyCount - 学習した単語数
+ * @returns {void}
+ */
+export function updateSession(studyCount) {
+  // 実装
+}
 ```
 
-**主要メソッド:**
-- `startSession(): void` - セッション開始
-- `endSession(): void` - セッション終了
-- `updateSession(studyCount: number): void` - セッション情報更新
-
-### 4. statsStore (`src/lib/stores/stats.ts`)
+### 4. statsStore (`src/lib/stores/stats.js`)
 
 **責務:** 学習統計の管理
 
-```typescript
+```javascript
 import { writable } from 'svelte/store';
-import type { StudyStats } from '$lib/types';
 
-export const statsStore = writable<StudyStats>({
+/**
+ * @typedef {import('./types').StudyStats} StudyStats
+ */
+
+/** @type {import('svelte/store').Writable<StudyStats>} */
+export const statsStore = writable({
   currentStreak: 0,
   longestStreak: 0,
   totalStudies: 0,
   lastStudyDate: ''
 });
-```
 
-**主要メソッド:**
-- `updateStreak(date: string): void` - ストリーク更新
-- `incrementTotalStudies(): void` - 総学習回数をインクリメント
+/**
+ * ストリーク更新
+ * @param {string} date - 日付（YYYY-MM-DD）
+ * @returns {void}
+ */
+export function updateStreak(date) {
+  // 実装
+}
+
+/**
+ * 総学習回数をインクリメント
+ * @returns {void}
+ */
+export function incrementTotalStudies() {
+  // 実装
+}
+```
 
 ---
 
@@ -381,34 +502,46 @@ export const statsStore = writable<StudyStats>({
 
 ### 基本設計
 
-**キー構成:**
-```typescript
-const STORAGE_KEYS = {
+**キー構成 (`src/lib/storage/index.js`):**
+
+```javascript
+export const STORAGE_KEYS = {
   PROGRESS: 'ela_v1_progress',
   LOGS: 'ela_v1_study_logs',
   SESSIONS: 'ela_v1_sessions',
   STATS: 'ela_v1_stats'
-} as const;
+};
 ```
 
 ### API インターフェース
 
-#### Progress API (`src/lib/storage/progress.ts`)
+#### Progress API (`src/lib/storage/progress.js`)
 
-```typescript
+```javascript
+import { STORAGE_KEYS } from './index.js';
+
+/**
+ * @typedef {import('../stores/progress').ProgressMap} ProgressMap
+ * @typedef {import('../stores/progress').WordProgress} WordProgress
+ */
+
 export const progressStorage = {
   /**
    * 進捗データを読み込む
+   * @returns {ProgressMap}
    */
-  load(): ProgressMap {
+  load() {
     const data = localStorage.getItem(STORAGE_KEYS.PROGRESS);
     return data ? JSON.parse(data) : {};
   },
 
   /**
    * 進捗データを保存
+   * @param {ProgressMap} progress - 進捗データ
+   * @returns {void}
+   * @throws {StorageQuotaExceededError}
    */
-  save(progress: ProgressMap): void {
+  save(progress) {
     try {
       localStorage.setItem(STORAGE_KEYS.PROGRESS, JSON.stringify(progress));
     } catch (error) {
@@ -418,16 +551,21 @@ export const progressStorage = {
 
   /**
    * 単語の進捗を取得
+   * @param {string} word - 単語
+   * @returns {WordProgress | null}
    */
-  get(word: string): WordProgress | null {
+  get(word) {
     const progress = this.load();
     return progress[word] || null;
   },
 
   /**
    * 単語の進捗を更新
+   * @param {string} word - 単語
+   * @param {WordProgress} progress - 進捗情報
+   * @returns {void}
    */
-  update(word: string, progress: WordProgress): void {
+  update(word, progress) {
     const allProgress = this.load();
     allProgress[word] = progress;
     this.save(allProgress);
@@ -435,29 +573,39 @@ export const progressStorage = {
 
   /**
    * 全データを削除
+   * @returns {void}
    */
-  clear(): void {
+  clear() {
     localStorage.removeItem(STORAGE_KEYS.PROGRESS);
   }
 };
 ```
 
-#### Logs API (`src/lib/storage/logs.ts`)
+#### Logs API (`src/lib/storage/logs.js`)
 
-```typescript
+```javascript
+import { STORAGE_KEYS } from './index.js';
+
+/**
+ * @typedef {import('./types').StudyLog} StudyLog
+ */
+
 export const logsStorage = {
   /**
    * 学習ログを読み込む
+   * @returns {StudyLog[]}
    */
-  load(): StudyLog[] {
+  load() {
     const data = localStorage.getItem(STORAGE_KEYS.LOGS);
     return data ? JSON.parse(data) : [];
   },
 
   /**
    * 学習ログを追加
+   * @param {StudyLog} log - 学習ログ
+   * @returns {void}
    */
-  add(log: StudyLog): void {
+  add(log) {
     const logs = this.load();
     logs.push(log);
     localStorage.setItem(STORAGE_KEYS.LOGS, JSON.stringify(logs));
@@ -465,8 +613,11 @@ export const logsStorage = {
 
   /**
    * 期間でフィルタリング
+   * @param {Date} startDate - 開始日
+   * @param {Date} endDate - 終了日
+   * @returns {StudyLog[]}
    */
-  filterByDate(startDate: Date, endDate: Date): StudyLog[] {
+  filterByDate(startDate, endDate) {
     const logs = this.load();
     return logs.filter(log =>
       log.timestamp >= startDate.getTime() &&
@@ -476,47 +627,101 @@ export const logsStorage = {
 
   /**
    * 単語ごとのログを取得
+   * @param {string} word - 単語
+   * @returns {StudyLog[]}
    */
-  getByWord(word: string): StudyLog[] {
+  getByWord(word) {
     const logs = this.load();
     return logs.filter(log => log.word === word);
   },
 
-  clear(): void {
+  /**
+   * 全データを削除
+   * @returns {void}
+   */
+  clear() {
     localStorage.removeItem(STORAGE_KEYS.LOGS);
   }
 };
 ```
 
-#### Sessions API (`src/lib/storage/sessions.ts`)
+#### Sessions API (`src/lib/storage/sessions.js`)
 
-```typescript
+```javascript
+/**
+ * @typedef {import('../stores/session').StudySession} StudySession
+ */
+
 export const sessionsStorage = {
-  load(): StudySession[] { /* ... */ },
-  add(session: StudySession): void { /* ... */ },
-  update(sessionId: string, updates: Partial<StudySession>): void { /* ... */ },
-  clear(): void { /* ... */ }
+  /**
+   * セッションデータを読み込む
+   * @returns {StudySession[]}
+   */
+  load() { /* ... */ },
+
+  /**
+   * セッションを追加
+   * @param {StudySession} session - セッション情報
+   * @returns {void}
+   */
+  add(session) { /* ... */ },
+
+  /**
+   * セッションを更新
+   * @param {string} sessionId - セッション ID
+   * @param {Partial<StudySession>} updates - 更新内容
+   * @returns {void}
+   */
+  update(sessionId, updates) { /* ... */ },
+
+  /**
+   * 全データを削除
+   * @returns {void}
+   */
+  clear() { /* ... */ }
 };
 ```
 
-#### Stats API (`src/lib/storage/stats.ts`)
+#### Stats API (`src/lib/storage/stats.js`)
 
-```typescript
+```javascript
+/**
+ * @typedef {import('../stores/stats').StudyStats} StudyStats
+ */
+
 export const statsStorage = {
-  load(): StudyStats { /* ... */ },
-  save(stats: StudyStats): void { /* ... */ },
-  clear(): void { /* ... */ }
+  /**
+   * 統計データを読み込む
+   * @returns {StudyStats}
+   */
+  load() { /* ... */ },
+
+  /**
+   * 統計データを保存
+   * @param {StudyStats} stats - 統計情報
+   * @returns {void}
+   */
+  save(stats) { /* ... */ },
+
+  /**
+   * 全データを削除
+   * @returns {void}
+   */
+  clear() { /* ... */ }
 };
 ```
 
 ### エラーハンドリング
 
-```typescript
+```javascript
 /**
  * ストレージ容量超過エラー
  */
 export class StorageQuotaExceededError extends Error {
-  constructor(message: string) {
+  /**
+   * @param {string} message - エラーメッセージ
+   */
+  constructor(message) {
     super(message);
     this.name = 'StorageQuotaExceededError';
   }
@@ -526,7 +731,10 @@ export class StorageQuotaExceededError extends Error {
  * データ破損エラー
  */
 export class DataCorruptionError extends Error {
-  constructor(message: string) {
+  /**
+   * @param {string} message - エラーメッセージ
+   */
+  constructor(message) {
     super(message);
     this.name = 'DataCorruptionError';
   }
@@ -543,18 +751,21 @@ export class DataCorruptionError extends Error {
 npm install fsrs
 ```
 
-### Scheduler サービス (`src/lib/services/scheduler.ts`)
+### Scheduler サービス (`src/lib/services/scheduler.js`)
 
-```typescript
+```javascript
 import { FSRS, Rating, State } from 'fsrs';
-import type { WordProgress, Rating as AppRating } from '$lib/types';
+
+/**
+ * @typedef {import('../stores/progress').WordProgress} WordProgress
+ * @typedef {import('../stores/progress').FSRSState} FSRSState
+ * @typedef {import('../storage/logs').Rating} Rating
+ */
 
 /**
  * FSRS スケジューラのラッパー
  */
 export class StudyScheduler {
-  private fsrs: FSRS;
-
   constructor() {
     // FSRS を初期化（デフォルトパラメータ）
     this.fsrs = new FSRS();
@@ -562,13 +773,16 @@ export class StudyScheduler {
 
   /**
    * アプリの Rating を FSRS の Rating に変換
+   * @param {Rating} rating - アプリの評価
+   * @returns {import('fsrs').Rating} FSRS の Rating
+   * @private
    */
-  private mapRating(rating: AppRating): Rating {
+  mapRating(rating) {
     switch (rating) {
       case 'forgot':
         return Rating.Again;
       case 'remembered':
-        return Rating.Good; // または Hard
+        return Rating.Good;
       case 'perfect':
         return Rating.Easy;
     }
@@ -576,8 +790,11 @@ export class StudyScheduler {
 
   /**
    * FSRS の State をアプリの FSRSState に変換
+   * @param {import('fsrs').State} state - FSRS の State
+   * @returns {FSRSState}
+   * @private
    */
-  private mapState(state: State): FSRSState {
+  mapState(state) {
     switch (state) {
       case State.New:
         return 'New';
@@ -591,14 +808,29 @@ export class StudyScheduler {
   }
 
   /**
-   * 単語を学習してスケジュールを更新
+   * アプリの FSRSState を FSRS の State に変換
+   * @param {FSRSState} state - アプリの FSRSState
+   * @returns {import('fsrs').State}
+   * @private
    */
-  schedule(
-    word: string,
-    currentProgress: WordProgress | null,
-    rating: AppRating,
-    now: Date = new Date()
-  ): WordProgress {
+  mapStateToFSRS(state) {
+    switch (state) {
+      case 'New': return State.New;
+      case 'Learning': return State.Learning;
+      case 'Review': return State.Review;
+      case 'Relearning': return State.Relearning;
+    }
+  }
+
+  /**
+   * 単語を学習してスケジュールを更新
+   * @param {string} word - 単語
+   * @param {WordProgress | null} currentProgress - 現在の進捗（新規の場合は null）
+   * @param {Rating} rating - 評価
+   * @param {Date} [now] - 現在時刻（デフォルト: new Date()）
+   * @returns {WordProgress} 更新後の進捗
+   */
+  schedule(word, currentProgress, rating, now = new Date()) {
     const fsrsRating = this.mapRating(rating);
 
     // 新規カードの場合
@@ -656,15 +888,6 @@ export class StudyScheduler {
       wrongCount: currentProgress.wrongCount + (rating === 'forgot' ? 1 : 0)
     };
   }
-
-  private mapStateToFSRS(state: FSRSState): State {
-    switch (state) {
-      case 'New': return State.New;
-      case 'Learning': return State.Learning;
-      case 'Review': return State.Review;
-      case 'Relearning': return State.Relearning;
-    }
-  }
 }
 
 // シングルトンインスタンス
@@ -675,19 +898,24 @@ export const scheduler = new StudyScheduler();
 
 ## 学習フロー（Study Queue）設計
 
-### 出題管理 (`src/lib/services/studyQueue.ts`)
+### 出題管理 (`src/lib/services/studyQueue.js`)
 
-```typescript
-import type { WordData, WordProgress, ProgressMap } from '$lib/types';
+```javascript
+/**
+ * @typedef {import('../stores/words').WordData} WordData
+ * @typedef {import('../stores/progress').WordProgress} WordProgress
+ * @typedef {import('../stores/progress').ProgressMap} ProgressMap
+ * @typedef {import('./types').StudySet} StudySet
+ */
 
 export class StudyQueue {
   /**
    * 5単語を選択して学習セットを作成
+   * @param {WordData[]} words - 全単語データ
+   * @param {ProgressMap} progressMap - 進捗データ
+   * @returns {string[]} 選択された5単語
    */
-  selectWords(
-    words: WordData[],
-    progressMap: ProgressMap
-  ): string[] {
+  selectWords(words, progressMap) {
     const now = Date.now();
     const wordList = words.map(w => w.word);
 
@@ -698,8 +926,8 @@ export class StudyQueue {
         return progress && progress.due <= now;
       })
       .sort((a, b) => {
-        const progressA = progressMap[a]!;
-        const progressB = progressMap[b]!;
+        const progressA = progressMap[a];
+        const progressB = progressMap[b];
         return progressA.due - progressB.due; // 期限超過時間が長い順
       });
 
@@ -713,13 +941,13 @@ export class StudyQueue {
         return progress && progress.scheduledDays >= 30;
       })
       .sort((a, b) => {
-        const progressA = progressMap[a]!;
-        const progressB = progressMap[b]!;
+        const progressA = progressMap[a];
+        const progressB = progressMap[b];
         return progressA.lastReview - progressB.lastReview; // 古い順
       });
 
     // 5単語を選択
-    const selected: string[] = [];
+    const selected = [];
     const allCandidates = [...dueCards, ...newCards, ...longTermCards];
 
     for (const word of allCandidates) {
@@ -741,10 +969,10 @@ export class StudyQueue {
 
   /**
    * セット内の次の単語を取得
+   * @param {StudySet} set - 学習セット
+   * @returns {string | null} 次の単語（完了時は null）
    */
-  getNextWord(
-    set: StudySet
-  ): string | null {
+  getNextWord(set) {
     const remaining = set.words.filter(
       word => !set.completedWords.has(word)
     );
@@ -762,12 +990,15 @@ export class StudyQueue {
 
   /**
    * セットが完了したか判定
+   * @param {StudySet} set - 学習セット
+   * @returns {boolean}
    */
-  isSetComplete(set: StudySet): boolean {
+  isSetComplete(set) {
     return set.completedWords.size === set.words.length;
   }
 }
 
+// シングルトンインスタンス
 export const studyQueue = new StudyQueue();
 ```
 
@@ -782,10 +1013,15 @@ export const studyQueue = new StudyQueue();
 **責務:** 単語カードの表示
 
 **Props:**
-```typescript
-export let wordData: WordData;
-export let meaningVisible: boolean = false;
-export let onSpeakWord: (word: string) => void;
+```javascript
+/** @type {WordData} */
+export let wordData;
+
+/** @type {boolean} */
+export let meaningVisible = false;
+
+/** @type {(word: string) => void} */
+export let onSpeakWord;
 ```
 
 **表示内容:**
@@ -799,9 +1035,12 @@ export let onSpeakWord: (word: string) => void;
 **責務:** 評価ボタンの表示
 
 **Props:**
-```typescript
-export let onRate: (rating: Rating) => void;
-export let hidePerfect: boolean = false; // Forgot後は Perfect を非表示
+```javascript
+/** @type {(rating: Rating) => void} */
+export let onRate;
+
+/** @type {boolean} - Forgot後は Perfect を非表示 */
+export let hidePerfect = false;
 ```
 
 **表示:**
@@ -814,10 +1053,15 @@ export let hidePerfect: boolean = false; // Forgot後は Perfect を非表示
 **責務:** セッション制御のフローティングボタン
 
 **Props:**
-```typescript
-export let isActive: boolean;
-export let onStart: () => void;
-export let onStop: () => void;
+```javascript
+/** @type {boolean} */
+export let isActive;
+
+/** @type {() => void} */
+export let onStart;
+
+/** @type {() => void} */
+export let onStop;
 ```
 
 #### 4. ProgressIndicator (`src/lib/components/ProgressIndicator.svelte`)
@@ -825,35 +1069,51 @@ export let onStop: () => void;
 **責務:** 学習進捗の表示
 
 **Props:**
-```typescript
-export let todayCount: number;
-export let totalCount: number;
-export let setProgress: { current: number; total: number };
+```javascript
+/** @type {number} */
+export let todayCount;
+
+/** @type {number} */
+export let totalCount;
+
+/** @type {{ current: number; total: number }} */
+export let setProgress;
 ```
 
 ---
 
 ## バリデーション設計
 
-### 単語データのバリデーション (`src/lib/utils/validator.ts`)
+### 単語データのバリデーション (`src/lib/utils/validator.js`)
 
-```typescript
-import type { WordData } from '$lib/types';
+```javascript
+/**
+ * @typedef {import('../stores/words').WordData} WordData
+ */
 
-export interface ValidationError {
-  index: number;
-  field: string;
-  message: string;
-}
+/**
+ * バリデーションエラー
+ * @typedef {Object} ValidationError
+ * @property {number} index - エラーが発生した単語のインデックス
+ * @property {string} field - エラーが発生したフィールド名
+ * @property {string} message - エラーメッセージ
+ */
+
+/**
+ * バリデーション結果
+ * @typedef {Object} ValidationResult
+ * @property {boolean} valid - バリデーションが成功したか
+ * @property {ValidationError[]} errors - エラーの配列
+ */
 
 /**
  * 単語データをバリデーション
+ * @param {unknown[]} words - バリデーション対象の単語データ
+ * @returns {ValidationResult}
  */
-export function validateWords(words: unknown[]): {
-  valid: boolean;
-  errors: ValidationError[];
-} {
-  const errors: ValidationError[] = [];
+export function validateWords(words) {
+  /** @type {ValidationError[]} */
+  const errors = [];
 
   words.forEach((word, index) => {
     // 必須フィールド: word
@@ -866,7 +1126,7 @@ export function validateWords(words: unknown[]): {
       return;
     }
 
-    const w = word as Record<string, unknown>;
+    const w = /** @type {Record<string, unknown>} */ (word);
 
     // word フィールド
     if (!w.word || typeof w.word !== 'string') {
@@ -901,10 +1161,13 @@ export function validateWords(words: unknown[]): {
 
 /**
  * 重複チェック
+ * @param {WordData[]} words - 単語データ
+ * @returns {string[]} 重複している単語のリスト
  */
-export function checkDuplicates(words: WordData[]): string[] {
-  const seen = new Set<string>();
-  const duplicates: string[] = [];
+export function checkDuplicates(words) {
+  const seen = new Set();
+  /** @type {string[]} */
+  const duplicates = [];
 
   words.forEach(word => {
     if (seen.has(word.word)) {
@@ -960,11 +1223,14 @@ export function checkDuplicates(words: WordData[]): string[] {
 
 ### ボタン表示ロジック
 
-```typescript
-function getAvailableRatings(
-  word: string,
-  set: StudySet
-): Rating[] {
+```javascript
+/**
+ * 利用可能な評価ボタンを取得
+ * @param {string} word - 単語
+ * @param {StudySet} set - 学習セット
+ * @returns {Rating[]} 利用可能な評価のリスト
+ */
+function getAvailableRatings(word, set) {
   // セット内で Forgot を選択済みの単語は Perfect を非表示
   if (set.forgotWords.has(word)) {
     return ['forgot', 'remembered'];
@@ -1168,7 +1434,7 @@ window.speechSynthesis.speak(utterance);
   "exportedAt": "2024-01-15T10:30:00Z",
   "progress": { /* 単語ごとの進捗 */ },
   "studyLogs": [ /* 学習ログ */ ],
-  "sessions": [ /* セッション情報 */ ],
+  "sessions": [ /* セッション情報 */ },
   "stats": { /* 統計情報 */ }
 }
 ```
