@@ -134,60 +134,50 @@
 
 ## SRS / 忘却曲線ロジック
 
+### 採用アルゴリズム: FSRS (Free Spaced Repetition Scheduler)
+
+このアプリでは **FSRS (Free Spaced Repetition Scheduler)** を採用します。
+
+**FSRSの特徴:**
+- **機械学習ベース**: 2万人のユーザーから7億件のレビューデータで学習された最新アルゴリズム（2023年開発）
+- **高精度な記憶予測**: 個人の学習履歴を分析し、最適な復習タイミングを提案
+- **効率性**: 従来のSM-2と比較して20-30%の復習回数削減を実現
+- **3つの変数**: Retrievability (想起可能性), Stability (安定性), Difficulty (難易度) を使用
+- **実績**: Anki、RemNoteなどの主要SRSアプリで採用
+
+**実装:**
+- JavaScript実装: [fsrs.js](https://github.com/open-spaced-repetition/fsrs.js)
+- npm パッケージとして提供されているため、容易に統合可能
+
 ### 評価（Rating）
 
 ユーザー操作と内部評価の対応：
 
-- ボタン `Forgot` → rating: `forgot`
-- ボタン `Remembered` → rating: `remembered`
-- ボタン `Perfect` → rating: `perfect`
+- ボタン `Forgot` → rating: `forgot` (または FSRS の `Again`)
+- ボタン `Remembered` → rating: `remembered` (または FSRS の `Hard`/`Good`)
+- ボタン `Perfect` → rating: `perfect` (または FSRS の `Easy`)
 
 ### スケジューラのインターフェース
 
-よりリッチなライブラリ（FSRS など）に差し替えやすいように、
-スケジューリングロジックは 1 つの関数インターフェースに隠蔽します。
+FSRSライブラリを使用しますが、将来的な差し替えを考慮して、
+スケジューリングロジックは統一された関数インターフェースで抽象化します。
 
 - `schedule(currentState, rating, now) -> nextState`
-  - `currentState`: 既存の進捗（新規カードの場合は `null` でもよい）。
+  - `currentState`: 既存の進捗（新規カードの場合は `null` でもよい）
   - `rating`: `forgot` | `remembered` | `perfect`
-  - `now`: 現在時刻（タイムスタンプ）。
-  - `nextState`: 更新後の進捗（新しい `interval` / `nextReviewAt` を含む）。
+  - `now`: 現在時刻（タイムスタンプ）
+  - `nextState`: 更新後の進捗（新しい `interval` / `nextReviewAt` を含む）
 
-### 初期実装（SM‑2 風の簡易版）
+### FSRSの内部動作
 
-第一段階では、SM‑2 をベースにしたシンプルなロジックを想定します。
+FSRSは以下のパラメータを管理します：
 
-- `easeFactor` は初期値 2.5、下限 1.3 程度。
-- `interval` は日単位で管理。
+- **Stability (S)**: 記憶の安定性（日数で表現）
+- **Difficulty (D)**: 単語の難易度（0-10のスケール）
+- **Retrievability (R)**: 現時点での想起可能性（0-1の確率）
 
-例ルール：
-
-- 新規カード（`repetition === 0`）:
-  - `forgot`:
-    - `repetition = 0`
-    - `interval = 1`
-    - `easeFactor -= 0.2`
-  - `remembered`:
-    - `repetition = 1`
-    - `interval = 1`
-  - `perfect`:
-    - `repetition = 1`
-    - `interval = 1`
-    - `easeFactor += 0.15`
-- 既習カード（`repetition > 0`）:
-  - `forgot`:
-    - `repetition = 0`
-    - `interval = 1`
-    - `easeFactor = max(1.3, easeFactor - 0.2)`
-  - `remembered`:
-    - `repetition++`
-    - `interval = previousInterval * easeFactor`
-  - `perfect`:
-    - `repetition++`
-    - `easeFactor += 0.15`
-    - `interval = previousInterval * easeFactor * 1.2`
-
-`nextReviewAt` は `now + intervalDays * 24h` で算出します。
+これらのパラメータは学習履歴に基づいて自動的に最適化され、
+`nextReviewAt` は想起可能性が最適な閾値（通常90%）に達するタイミングで算出されます。
 
 ### 出題順・優先順位（5単語1セット制）
 
