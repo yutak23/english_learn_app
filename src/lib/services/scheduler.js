@@ -162,7 +162,7 @@ export class StudyScheduler {
 			state: this.mapState(nextCard.state),
 			stability: nextCard.stability,
 			difficulty: nextCard.difficulty,
-			elapsedDays: 0,
+			elapsedDays: nextCard.elapsed_days,
 			scheduledDays: nextCard.scheduled_days,
 			reps: nextCard.reps,
 			lapses: nextCard.lapses,

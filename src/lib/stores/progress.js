@@ -1,4 +1,4 @@
-import { writable, derived } from 'svelte/store';
+import { writable, derived, get } from 'svelte/store';
 import { progressStorage } from '../storage/progress.js';
 
 /**
@@ -60,11 +60,7 @@ export function loadProgress() {
  * localStorage に進捗データを保存
  */
 export function saveProgress() {
-	/** @type {ProgressMap} */
-	let currentProgress = {};
-	progressStore.subscribe((value) => {
-		currentProgress = value;
-	})();
+	const currentProgress = get(progressStore);
 	progressStorage.save(currentProgress);
 }
 
@@ -88,11 +84,7 @@ export function updateProgress(word, progress) {
  * @returns {WordProgress | null}
  */
 export function getProgress(word) {
-	/** @type {ProgressMap} */
-	let currentProgress = {};
-	progressStore.subscribe((value) => {
-		currentProgress = value;
-	})();
+	const currentProgress = get(progressStore);
 	return currentProgress[word] || null;
 }
 

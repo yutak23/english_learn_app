@@ -1,4 +1,4 @@
-import { writable } from 'svelte/store';
+import { writable, get } from 'svelte/store';
 import { statsStorage } from '../storage/stats.js';
 import { getTodayDateString, getYesterdayDateString } from '../utils/date.js';
 
@@ -31,16 +31,7 @@ export function loadStats() {
  * localStorage に統計データを保存
  */
 export function saveStats() {
-	/** @type {StudyStats} */
-	let currentStats = {
-		currentStreak: 0,
-		longestStreak: 0,
-		totalStudies: 0,
-		lastStudyDate: ''
-	};
-	statsStore.subscribe((value) => {
-		currentStats = value;
-	})();
+	const currentStats = get(statsStore);
 	statsStorage.save(currentStats);
 }
 
