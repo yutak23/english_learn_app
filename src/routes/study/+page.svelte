@@ -41,21 +41,22 @@
 
 	// Derived values
 	let isSessionActive = $derived($sessionStore.isActive);
-	let wordsLoaded = $derived($wordsStore.words.length > 0);
-	let wordsLoading = $derived($wordsStore.loading);
-	let wordsError = $derived($wordsStore.error);
-	let setProgress = $derived(
-		currentSet ? studyQueue.getSetProgress(currentSet) : { current: 0, total: 0 }
-	);
+        let wordsLoaded = $derived($wordsStore.words.length > 0);
+        let wordsLoading = $derived($wordsStore.loading);
+        let wordsError = $derived($wordsStore.error);
+        let canStartSession = $derived(wordsLoaded && !wordsLoading && !wordsError);
+        let setProgress = $derived(
+                currentSet ? studyQueue.getSetProgress(currentSet) : { current: 0, total: 0 }
+        );
 	let hidePerfect = $derived(
 		currentSet && currentWord ? studyQueue.hasForgotten(currentSet, currentWord) : false
 	);
 	let totalStudied = $derived($statsStore.totalStudies);
 
-	onMount(async () => {
-		// Load data from localStorage
-		loadProgress();
-		loadStats();
+        onMount(async () => {
+                // Load data from localStorage
+                loadProgress();
+                loadStats();
 
 		// Load words
 		await loadWords({ wordFiles: ['/data/basic.json'] });
@@ -63,12 +64,17 @@
 		// Count today's studies
 		const todayLogs = logsStorage.getTodayLogs();
 		todayCount = todayLogs.length;
-	});
+        });
 
-	function handleStartSession() {
-		startSession();
-		startNewSet();
-	}
+        function handleStartSession() {
+                if (!canStartSession) {
+                        alert('Words are not ready yet. Please wait for them to load or check settings.');
+                        return;
+                }
+
+                startSession();
+                startNewSet();
+        }
 
 	function handleStopSession() {
 		if (confirm('Are you sure you want to stop the session?')) {
@@ -198,11 +204,12 @@
 		</div>
 	{/if}
 
-	<SessionControl
-		isActive={isSessionActive}
-		onStart={handleStartSession}
-		onStop={handleStopSession}
-	/>
+        <SessionControl
+                isActive={isSessionActive}
+                onStart={handleStartSession}
+                onStop={handleStopSession}
+                disabled={!isSessionActive && !canStartSession}
+        />
 </div>
 
 <style>
