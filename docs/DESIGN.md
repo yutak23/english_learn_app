@@ -175,7 +175,6 @@ src/
  * @property {number} correctCount - Forgot 以外の回答数
  * @property {number} wrongCount - Forgot の回数
  * @property {number} totalStudyTimeSec - 累計学習時間（秒）
- * @property {boolean} isMastered - Perfect を選択してマスター済みかどうか
  */
 
 /**
@@ -842,8 +841,7 @@ export class StudyScheduler {
         lastRating: rating,
         correctCount: rating !== 'forgot' ? 1 : 0,
         wrongCount: rating === 'forgot' ? 1 : 0,
-        totalStudyTimeSec: 0,
-        isMastered: rating === 'perfect'
+        totalStudyTimeSec: 0
       };
     }
 
@@ -876,8 +874,7 @@ export class StudyScheduler {
       due: nextCard.due.getTime(),
       lastRating: rating,
       correctCount: currentProgress.correctCount + (rating !== 'forgot' ? 1 : 0),
-      wrongCount: currentProgress.wrongCount + (rating === 'forgot' ? 1 : 0),
-      isMastered: currentProgress.isMastered || rating === 'perfect'
+      wrongCount: currentProgress.wrongCount + (rating === 'forgot' ? 1 : 0)
     };
   }
 }
@@ -1334,7 +1331,6 @@ FSRSアルゴリズムで使用するパラメータを含む進捗情報：
 - `correctCount`: `Forgot` 以外の回答数
 - `wrongCount`: `Forgot` の回数
 - `totalStudyTimeSec`: その単語に費やした累計秒数
-- `isMastered`: Perfect を選択してマスター済みかどうか
 
 ### 学習ログ（レポート用）
 
@@ -1455,10 +1451,9 @@ Report画面では、FSRS内部の状態を以下のようにユーザー向け�
 
 | 表示状態 | 定義 |
 |---------|------|
-| `Mastered` | `isMastered === true` の単語 |
 | `Stable` | `state === 'Review'` かつ `scheduledDays >= 30` の単語 |
-| `Learning` | `state === 'Learning'` または `state === 'Relearning'` の単語 |
-| `New` | `state === 'New'` の単語 |
+| `Learning` | `state === 'Learning'` または `state === 'Relearning'` または `state === 'Review'` の単語 |
+| `New` | `state === 'New'` の単語（未学習） |
 
 **実装例:**
 
@@ -1469,18 +1464,18 @@ Report画面では、FSRS内部の状態を以下のようにユーザー向け�
 
 /**
  * 表示用の状態
- * @typedef {'Mastered' | 'Stable' | 'Learning' | 'New'} DisplayState
+ * @typedef {'Stable' | 'Learning' | 'New'} DisplayState
  */
 
 /**
  * FSRS の状態を表示用の状態に変換
- * @param {WordProgress} progress - 単語の進捗情報
+ * @param {WordProgress | null} progress - 単語の進捗情報（未学習の場合は null）
  * @returns {DisplayState} 表示用の状態
  */
 function getDisplayState(progress) {
-  // マスター済み
-  if (progress.isMastered) {
-    return 'Mastered';
+  // 未学習
+  if (!progress || progress.state === 'New') {
+    return 'New';
   }
 
   // 安定状態（長期記憶）
@@ -1489,12 +1484,7 @@ function getDisplayState(progress) {
   }
 
   // 学習中
-  if (progress.state === 'Learning' || progress.state === 'Relearning') {
-    return 'Learning';
-  }
-
-  // 未学習
-  return 'New';
+  return 'Learning';
 }
 ```
 
