@@ -1,12 +1,13 @@
+import { DateTime } from 'luxon';
+
+const JST_ZONE = 'Asia/Tokyo';
+
 /**
  * JST（日本標準時）の現在時刻を取得
- * @returns {Date} JST の Date オブジェクト
+ * @returns {DateTime} luxon DateTime オブジェクト（JST）
  */
-export function getJSTDate() {
-	const now = new Date();
-	// UTC時刻を取得し、JSTオフセット（+9時間）を加算
-	const utc = now.getTime() + now.getTimezoneOffset() * 60 * 1000;
-	return new Date(utc + 9 * 60 * 60 * 1000);
+export function getJSTNow() {
+	return DateTime.now().setZone(JST_ZONE);
 }
 
 /**
@@ -14,11 +15,7 @@ export function getJSTDate() {
  * @returns {string} YYYY-MM-DD 形式
  */
 export function getTodayDateString() {
-	const jstDate = getJSTDate();
-	const year = jstDate.getFullYear();
-	const month = String(jstDate.getMonth() + 1).padStart(2, '0');
-	const day = String(jstDate.getDate()).padStart(2, '0');
-	return `${year}-${month}-${day}`;
+	return getJSTNow().toFormat('yyyy-MM-dd');
 }
 
 /**
@@ -26,12 +23,7 @@ export function getTodayDateString() {
  * @returns {string} YYYY-MM-DD 形式
  */
 export function getYesterdayDateString() {
-	const jstDate = getJSTDate();
-	jstDate.setDate(jstDate.getDate() - 1);
-	const year = jstDate.getFullYear();
-	const month = String(jstDate.getMonth() + 1).padStart(2, '0');
-	const day = String(jstDate.getDate()).padStart(2, '0');
-	return `${year}-${month}-${day}`;
+	return getJSTNow().minus({ days: 1 }).toFormat('yyyy-MM-dd');
 }
 
 /**
@@ -39,10 +31,8 @@ export function getYesterdayDateString() {
  * @returns {number} タイムスタンプ（ミリ秒）
  */
 export function getTodayStartTimestamp() {
-	const jstDate = getJSTDate();
-	jstDate.setHours(0, 0, 0, 0);
-	// JSTの0時をUTCタイムスタンプに変換（-9時間）
-	return jstDate.getTime() - 9 * 60 * 60 * 1000;
+	const startOfDay = getJSTNow().startOf('day');
+	return startOfDay.toMillis();
 }
 
 /**
@@ -50,8 +40,7 @@ export function getTodayStartTimestamp() {
  * @returns {number} タイムスタンプ（ミリ秒）
  */
 export function getTodayEndTimestamp() {
-	const jstDate = getJSTDate();
-	jstDate.setHours(23, 59, 59, 999);
-	// JSTの23:59をUTCタイムスタンプに変換（-9時間）
-	return jstDate.getTime() - 9 * 60 * 60 * 1000;
+	// 翌日の開始時刻から1ミリ秒引く
+	const tomorrowStart = getJSTNow().plus({ days: 1 }).startOf('day');
+	return tomorrowStart.toMillis() - 1;
 }
