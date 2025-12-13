@@ -6,7 +6,7 @@
 <button
 	class="session-control"
 	class:active={isActive}
-	onclick={() => isActive ? onStop() : onStart()}
+	onclick={() => (isActive ? onStop() : onStart())}
 >
 	{#if isActive}
 		<span class="icon">⏹</span>

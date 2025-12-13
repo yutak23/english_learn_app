@@ -1,4 +1,5 @@
 import { STORAGE_KEYS, StorageQuotaExceededError } from './index.js';
+import { getTodayStartTimestamp, getTodayEndTimestamp } from '../utils/date.js';
 
 /**
  * @typedef {import('../stores/progress.js').FSRSState} FSRSState
@@ -79,15 +80,14 @@ export const logsStorage = {
 	},
 
 	/**
-	 * 今日の学習ログを取得
+	 * 今日の学習ログを取得（JST基準）
 	 * @returns {StudyLog[]}
 	 */
 	getTodayLogs() {
-		const today = new Date();
-		today.setHours(0, 0, 0, 0);
-		const tomorrow = new Date(today);
-		tomorrow.setDate(tomorrow.getDate() + 1);
-		return this.filterByDate(today, tomorrow);
+		const logs = this.load();
+		const todayStart = getTodayStartTimestamp();
+		const todayEnd = getTodayEndTimestamp();
+		return logs.filter((log) => log.timestamp >= todayStart && log.timestamp <= todayEnd);
 	},
 
 	/**
