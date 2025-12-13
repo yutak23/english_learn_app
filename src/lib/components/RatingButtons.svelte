@@ -8,27 +8,13 @@
 </script>
 
 <div class="rating-buttons">
-	<button
-		class="rating-button forgot"
-		onclick={() => onRate('forgot')}
-		{disabled}
-	>
-		Forgot
-	</button>
+	<button class="rating-button forgot" onclick={() => onRate('forgot')} {disabled}> Forgot </button>
 	{#if !hidePerfect}
-		<button
-			class="rating-button perfect"
-			onclick={() => onRate('perfect')}
-			{disabled}
-		>
+		<button class="rating-button perfect" onclick={() => onRate('perfect')} {disabled}>
 			Perfect
 		</button>
 	{/if}
-	<button
-		class="rating-button remembered"
-		onclick={() => onRate('remembered')}
-		{disabled}
-	>
+	<button class="rating-button remembered" onclick={() => onRate('remembered')} {disabled}>
 		Remembered
 	</button>
 </div>

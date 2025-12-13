@@ -6,8 +6,18 @@
 	import ProgressIndicator from '$lib/components/ProgressIndicator.svelte';
 	import SessionControl from '$lib/components/SessionControl.svelte';
 	import { wordsStore, wordsMap, loadWords } from '$lib/stores/words.js';
-	import { progressStore, loadProgress, updateProgress, getProgress } from '$lib/stores/progress.js';
-	import { sessionStore, startSession, endSession, incrementStudyCount } from '$lib/stores/session.js';
+	import {
+		progressStore,
+		loadProgress,
+		updateProgress,
+		getProgress
+	} from '$lib/stores/progress.js';
+	import {
+		sessionStore,
+		startSession,
+		endSession,
+		incrementStudyCount
+	} from '$lib/stores/session.js';
 	import { statsStore, loadStats, updateStreak, incrementTotalStudies } from '$lib/stores/stats.js';
 	import { scheduler } from '$lib/services/scheduler.js';
 	import { studyQueue } from '$lib/services/studyQueue.js';
@@ -34,8 +44,12 @@
 	let wordsLoaded = $derived($wordsStore.words.length > 0);
 	let wordsLoading = $derived($wordsStore.loading);
 	let wordsError = $derived($wordsStore.error);
-	let setProgress = $derived(currentSet ? studyQueue.getSetProgress(currentSet) : { current: 0, total: 0 });
-	let hidePerfect = $derived(currentSet && currentWord ? studyQueue.hasForgotten(currentSet, currentWord) : false);
+	let setProgress = $derived(
+		currentSet ? studyQueue.getSetProgress(currentSet) : { current: 0, total: 0 }
+	);
+	let hidePerfect = $derived(
+		currentSet && currentWord ? studyQueue.hasForgotten(currentSet, currentWord) : false
+	);
 	let totalStudied = $derived($statsStore.totalStudies);
 
 	onMount(async () => {
@@ -98,12 +112,7 @@
 		const currentState = existingProgress?.state || 'New';
 
 		// Update FSRS schedule
-		const newProgress = scheduler.schedule(
-			currentWord,
-			existingProgress,
-			rating,
-			timeSpentSec
-		);
+		const newProgress = scheduler.schedule(currentWord, existingProgress, rating, timeSpentSec);
 		updateProgress(currentWord, newProgress);
 
 		// Record log
@@ -150,9 +159,7 @@
 
 <div class="study-page">
 	<header class="header">
-		<button class="back-button" onclick={goBack}>
-			← Back
-		</button>
+		<button class="back-button" onclick={goBack}> ← Back </button>
 		<h1>Study</h1>
 	</header>
 
@@ -180,23 +187,11 @@
 			/>
 		</div>
 	{:else if currentWordData}
-		<ProgressIndicator
-			{todayCount}
-			totalCount={totalStudied}
-			{setProgress}
-		/>
+		<ProgressIndicator {todayCount} totalCount={totalStudied} {setProgress} />
 
-		<WordCard
-			wordData={currentWordData}
-			{meaningVisible}
-			onToggleMeaning={toggleMeaning}
-		/>
+		<WordCard wordData={currentWordData} {meaningVisible} onToggleMeaning={toggleMeaning} />
 
-		<RatingButtons
-			onRate={handleRate}
-			{hidePerfect}
-			disabled={!meaningVisible}
-		/>
+		<RatingButtons onRate={handleRate} {hidePerfect} disabled={!meaningVisible} />
 	{:else}
 		<div class="loading">
 			<p>Preparing next word...</p>

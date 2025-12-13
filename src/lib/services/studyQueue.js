@@ -77,7 +77,9 @@ export class StudyQueue {
 		scoredWords.sort((a, b) => b.score - a.score);
 
 		// 上位5単語（または全単語数が5未満の場合はその数）を選択
-		const selectedWords = scoredWords.slice(0, Math.min(SET_SIZE, scoredWords.length)).map((item) => item.word);
+		const selectedWords = scoredWords
+			.slice(0, Math.min(SET_SIZE, scoredWords.length))
+			.map((item) => item.word);
 
 		return {
 			words: selectedWords,

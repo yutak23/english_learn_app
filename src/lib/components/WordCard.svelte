@@ -93,7 +93,7 @@
 	{#if wordData.derivatives && wordData.derivatives.length > 0 && meaningVisible}
 		<div class="derivatives-section">
 			<h4>Derivatives</h4>
-			{#each wordData.derivatives as derivative}
+			{#each wordData.derivatives as derivative (derivative.word)}
 				<div class="derivative">
 					<span class="derivative-word">{derivative.word}</span>
 					{#if derivative.type}

@@ -1,6 +1,11 @@
 <script>
 	import { goto } from '$app/navigation';
-	import { exportAllData, importAllData, clearAllData, getStorageUsage } from '$lib/storage/index.js';
+	import {
+		exportAllData,
+		importAllData,
+		clearAllData,
+		getStorageUsage
+	} from '$lib/storage/index.js';
 
 	let storageUsage = $state({ used: 0, total: 0, percentage: 0 });
 	let importError = $state('');
@@ -72,9 +77,7 @@
 
 <div class="settings-page">
 	<header class="header">
-		<button class="back-button" onclick={() => goto('/')}>
-			← Back
-		</button>
+		<button class="back-button" onclick={() => goto('/')}> ← Back </button>
 		<h1>Settings</h1>
 	</header>
 
@@ -93,18 +96,14 @@
 		</div>
 
 		<div class="button-group">
-			<button class="action-button" onclick={handleExport}>
-				Export Data
-			</button>
+			<button class="action-button" onclick={handleExport}> Export Data </button>
 
 			<label class="action-button">
 				Import Data
 				<input type="file" accept=".json" onchange={handleImport} hidden />
 			</label>
 
-			<button class="action-button danger" onclick={handleReset}>
-				Reset All Data
-			</button>
+			<button class="action-button danger" onclick={handleReset}> Reset All Data </button>
 		</div>
 
 		{#if importError}
@@ -122,8 +121,8 @@
 			<p><strong>English SRS Learning App</strong></p>
 			<p>Version 0.0.1</p>
 			<p class="description">
-				A spaced repetition system (SRS) app for learning English vocabulary,
-				powered by the FSRS algorithm.
+				A spaced repetition system (SRS) app for learning English vocabulary, powered by the FSRS
+				algorithm.
 			</p>
 		</div>
 	</section>

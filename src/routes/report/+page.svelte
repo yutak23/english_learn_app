@@ -8,9 +8,7 @@
 
 <div class="report-page">
 	<header class="header">
-		<button class="back-button" onclick={() => goto('/')}>
-			← Back
-		</button>
+		<button class="back-button" onclick={() => goto('/')}> ← Back </button>
 		<h1>Report</h1>
 	</header>
 

@@ -7,26 +7,31 @@
 ## 技術スタック
 
 ### フロントエンド
+
 - **フレームワーク**: SvelteKit
   - 選定理由: シンプルで高速、静的サイト生成が容易
   - CLI: `sv` で作成
 
 ### 言語
+
 - **JavaScript**: ESModule形式
 - **型定義**: JSDoc による型アノテーション
   - TypeScriptファイル（`.ts`）は使用しない
   - JSDocコメントでランタイム型チェックとエディタ補完を提供
 
 ### データ管理
+
 - **データソース**: 複数の JSON ファイル（フロントエンドで読み込み）
 - **永続化**: localStorage のみ（バックエンド不要）
 
 ### 音声
+
 - **音声合成**: Web Speech API（ブラウザ標準）
   - 実装: `SpeechSynthesisUtterance` を使用
   - 無料、オフライン動作可能
 
 ### 対応環境
+
 - **ブラウザ**: Chrome（最新版）
 - **デバイス**: スマートフォン
 - **UI言語**: すべて英語表記
@@ -79,6 +84,7 @@ src/
 ```
 
 **注意:**
+
 - `src/lib/types/` ディレクトリは作成しない
 - 型定義は各ファイルで JSDoc として記述
 
@@ -298,12 +304,12 @@ src/
 
 ### SvelteKit ルート構成
 
-| パス | ページ | 説明 |
-|------|--------|------|
-| `/` | Home | ホーム画面（学習開始、レポート、設定へのリンク） |
-| `/study` | Study | 学習画面（単語学習） |
-| `/report` | Report | レポート画面（学習統計） |
-| `/settings` | Settings | 設定画面（データ管理、単語ファイル設定） |
+| パス        | ページ   | 説明                                             |
+| ----------- | -------- | ------------------------------------------------ |
+| `/`         | Home     | ホーム画面（学習開始、レポート、設定へのリンク） |
+| `/study`    | Study    | 学習画面（単語学習）                             |
+| `/report`   | Report   | レポート画面（学習統計）                         |
+| `/settings` | Settings | 設定画面（データ管理、単語ファイル設定）         |
 
 ### ページ遷移フロー
 
@@ -317,6 +323,7 @@ src/
 ```
 
 **ナビゲーション:**
+
 - 各ページに戻るボタン（← Back to Home）を配置
 - セッション中は `/study` からの離脱時に確認ダイアログ表示
 
@@ -335,15 +342,15 @@ import { writable, derived } from 'svelte/store';
 
 /** @type {import('svelte/store').Writable<WordsState>} */
 export const wordsStore = writable({
-  words: [],
-  loading: false,
-  error: null
+	words: [],
+	loading: false,
+	error: null
 });
 
 // 単語をマップ形式で取得（word をキーとする）
 export const wordsMap = derived(
-  wordsStore,
-  ($words) => new Map($words.words.map(w => [w.word, w]))
+	wordsStore,
+	($words) => new Map($words.words.map((w) => [w.word, w]))
 );
 
 /**
@@ -352,7 +359,7 @@ export const wordsMap = derived(
  * @returns {Promise<void>}
  */
 export async function loadWords(config) {
-  // 実装
+	// 実装
 }
 
 /**
@@ -360,7 +367,7 @@ export async function loadWords(config) {
  * @returns {boolean}
  */
 export function validateWords() {
-  // 実装
+	// 実装
 }
 ```
 
@@ -381,7 +388,7 @@ export const progressStore = writable({});
  * @returns {void}
  */
 export function load() {
-  // 実装
+	// 実装
 }
 
 /**
@@ -389,7 +396,7 @@ export function load() {
  * @returns {void}
  */
 export function save() {
-  // 実装
+	// 実装
 }
 
 /**
@@ -399,7 +406,7 @@ export function save() {
  * @returns {void}
  */
 export function update(word, progress) {
-  // 実装
+	// 実装
 }
 
 /**
@@ -408,7 +415,7 @@ export function update(word, progress) {
  * @returns {WordProgress | null}
  */
 export function get(word) {
-  // 実装
+	// 実装
 }
 ```
 
@@ -423,25 +430,22 @@ import { writable, derived } from 'svelte/store';
 
 /** @type {import('svelte/store').Writable<SessionState>} */
 export const sessionStore = writable({
-  current: null,
-  isActive: false
+	current: null,
+	isActive: false
 });
 
 // アクティブな学習時間を計算
-export const activeTime = derived(
-  sessionStore,
-  ($session) => {
-    if (!$session.isActive || !$session.current) return 0;
-    return Math.floor((Date.now() - $session.current.startAt) / 1000);
-  }
-);
+export const activeTime = derived(sessionStore, ($session) => {
+	if (!$session.isActive || !$session.current) return 0;
+	return Math.floor((Date.now() - $session.current.startAt) / 1000);
+});
 
 /**
  * セッション開始
  * @returns {void}
  */
 export function startSession() {
-  // 実装
+	// 実装
 }
 
 /**
@@ -449,7 +453,7 @@ export function startSession() {
  * @returns {void}
  */
 export function endSession() {
-  // 実装
+	// 実装
 }
 
 /**
@@ -458,7 +462,7 @@ export function endSession() {
  * @returns {void}
  */
 export function updateSession(studyCount) {
-  // 実装
+	// 実装
 }
 ```
 
@@ -473,10 +477,10 @@ import { writable } from 'svelte/store';
 
 /** @type {import('svelte/store').Writable<StudyStats>} */
 export const statsStore = writable({
-  currentStreak: 0,
-  longestStreak: 0,
-  totalStudies: 0,
-  lastStudyDate: ''
+	currentStreak: 0,
+	longestStreak: 0,
+	totalStudies: 0,
+	lastStudyDate: ''
 });
 
 /**
@@ -485,7 +489,7 @@ export const statsStore = writable({
  * @returns {void}
  */
 export function updateStreak(date) {
-  // 実装
+	// 実装
 }
 
 /**
@@ -493,7 +497,7 @@ export function updateStreak(date) {
  * @returns {void}
  */
 export function incrementTotalStudies() {
-  // 実装
+	// 実装
 }
 ```
 
@@ -507,10 +511,10 @@ export function incrementTotalStudies() {
 
 ```javascript
 export const STORAGE_KEYS = {
-  PROGRESS: 'ela_v1_progress',
-  LOGS: 'ela_v1_study_logs',
-  SESSIONS: 'ela_v1_sessions',
-  STATS: 'ela_v1_stats'
+	PROGRESS: 'ela_v1_progress',
+	LOGS: 'ela_v1_study_logs',
+	SESSIONS: 'ela_v1_sessions',
+	STATS: 'ela_v1_stats'
 };
 ```
 
@@ -527,58 +531,58 @@ import { STORAGE_KEYS } from './index.js';
  */
 
 export const progressStorage = {
-  /**
-   * 進捗データを読み込む
-   * @returns {ProgressMap}
-   */
-  load() {
-    const data = localStorage.getItem(STORAGE_KEYS.PROGRESS);
-    return data ? JSON.parse(data) : {};
-  },
+	/**
+	 * 進捗データを読み込む
+	 * @returns {ProgressMap}
+	 */
+	load() {
+		const data = localStorage.getItem(STORAGE_KEYS.PROGRESS);
+		return data ? JSON.parse(data) : {};
+	},
 
-  /**
-   * 進捗データを保存
-   * @param {ProgressMap} progress - 進捗データ
-   * @returns {void}
-   * @throws {StorageQuotaExceededError}
-   */
-  save(progress) {
-    try {
-      localStorage.setItem(STORAGE_KEYS.PROGRESS, JSON.stringify(progress));
-    } catch (error) {
-      throw new StorageQuotaExceededError('Failed to save progress');
-    }
-  },
+	/**
+	 * 進捗データを保存
+	 * @param {ProgressMap} progress - 進捗データ
+	 * @returns {void}
+	 * @throws {StorageQuotaExceededError}
+	 */
+	save(progress) {
+		try {
+			localStorage.setItem(STORAGE_KEYS.PROGRESS, JSON.stringify(progress));
+		} catch (error) {
+			throw new StorageQuotaExceededError('Failed to save progress');
+		}
+	},
 
-  /**
-   * 単語の進捗を取得
-   * @param {string} word - 単語
-   * @returns {WordProgress | null}
-   */
-  get(word) {
-    const progress = this.load();
-    return progress[word] || null;
-  },
+	/**
+	 * 単語の進捗を取得
+	 * @param {string} word - 単語
+	 * @returns {WordProgress | null}
+	 */
+	get(word) {
+		const progress = this.load();
+		return progress[word] || null;
+	},
 
-  /**
-   * 単語の進捗を更新
-   * @param {string} word - 単語
-   * @param {WordProgress} progress - 進捗情報
-   * @returns {void}
-   */
-  update(word, progress) {
-    const allProgress = this.load();
-    allProgress[word] = progress;
-    this.save(allProgress);
-  },
+	/**
+	 * 単語の進捗を更新
+	 * @param {string} word - 単語
+	 * @param {WordProgress} progress - 進捗情報
+	 * @returns {void}
+	 */
+	update(word, progress) {
+		const allProgress = this.load();
+		allProgress[word] = progress;
+		this.save(allProgress);
+	},
 
-  /**
-   * 全データを削除
-   * @returns {void}
-   */
-  clear() {
-    localStorage.removeItem(STORAGE_KEYS.PROGRESS);
-  }
+	/**
+	 * 全データを削除
+	 * @returns {void}
+	 */
+	clear() {
+		localStorage.removeItem(STORAGE_KEYS.PROGRESS);
+	}
 };
 ```
 
@@ -590,57 +594,56 @@ import { STORAGE_KEYS } from './index.js';
 // 型定義は同じファイル内で定義済み（上記の Rating, StudyLog を参照）
 
 export const logsStorage = {
-  /**
-   * 学習ログを読み込む
-   * @returns {StudyLog[]}
-   */
-  load() {
-    const data = localStorage.getItem(STORAGE_KEYS.LOGS);
-    return data ? JSON.parse(data) : [];
-  },
+	/**
+	 * 学習ログを読み込む
+	 * @returns {StudyLog[]}
+	 */
+	load() {
+		const data = localStorage.getItem(STORAGE_KEYS.LOGS);
+		return data ? JSON.parse(data) : [];
+	},
 
-  /**
-   * 学習ログを追加
-   * @param {StudyLog} log - 学習ログ
-   * @returns {void}
-   */
-  add(log) {
-    const logs = this.load();
-    logs.push(log);
-    localStorage.setItem(STORAGE_KEYS.LOGS, JSON.stringify(logs));
-  },
+	/**
+	 * 学習ログを追加
+	 * @param {StudyLog} log - 学習ログ
+	 * @returns {void}
+	 */
+	add(log) {
+		const logs = this.load();
+		logs.push(log);
+		localStorage.setItem(STORAGE_KEYS.LOGS, JSON.stringify(logs));
+	},
 
-  /**
-   * 期間でフィルタリング
-   * @param {Date} startDate - 開始日
-   * @param {Date} endDate - 終了日
-   * @returns {StudyLog[]}
-   */
-  filterByDate(startDate, endDate) {
-    const logs = this.load();
-    return logs.filter(log =>
-      log.timestamp >= startDate.getTime() &&
-      log.timestamp <= endDate.getTime()
-    );
-  },
+	/**
+	 * 期間でフィルタリング
+	 * @param {Date} startDate - 開始日
+	 * @param {Date} endDate - 終了日
+	 * @returns {StudyLog[]}
+	 */
+	filterByDate(startDate, endDate) {
+		const logs = this.load();
+		return logs.filter(
+			(log) => log.timestamp >= startDate.getTime() && log.timestamp <= endDate.getTime()
+		);
+	},
 
-  /**
-   * 単語ごとのログを取得
-   * @param {string} word - 単語
-   * @returns {StudyLog[]}
-   */
-  getByWord(word) {
-    const logs = this.load();
-    return logs.filter(log => log.word === word);
-  },
+	/**
+	 * 単語ごとのログを取得
+	 * @param {string} word - 単語
+	 * @returns {StudyLog[]}
+	 */
+	getByWord(word) {
+		const logs = this.load();
+		return logs.filter((log) => log.word === word);
+	},
 
-  /**
-   * 全データを削除
-   * @returns {void}
-   */
-  clear() {
-    localStorage.removeItem(STORAGE_KEYS.LOGS);
-  }
+	/**
+	 * 全データを削除
+	 * @returns {void}
+	 */
+	clear() {
+		localStorage.removeItem(STORAGE_KEYS.LOGS);
+	}
 };
 ```
 
@@ -652,32 +655,40 @@ export const logsStorage = {
  */
 
 export const sessionsStorage = {
-  /**
-   * セッションデータを読み込む
-   * @returns {StudySession[]}
-   */
-  load() { /* ... */ },
+	/**
+	 * セッションデータを読み込む
+	 * @returns {StudySession[]}
+	 */
+	load() {
+		/* ... */
+	},
 
-  /**
-   * セッションを追加
-   * @param {StudySession} session - セッション情報
-   * @returns {void}
-   */
-  add(session) { /* ... */ },
+	/**
+	 * セッションを追加
+	 * @param {StudySession} session - セッション情報
+	 * @returns {void}
+	 */
+	add(session) {
+		/* ... */
+	},
 
-  /**
-   * セッションを更新
-   * @param {string} sessionId - セッション ID
-   * @param {Partial<StudySession>} updates - 更新内容
-   * @returns {void}
-   */
-  update(sessionId, updates) { /* ... */ },
+	/**
+	 * セッションを更新
+	 * @param {string} sessionId - セッション ID
+	 * @param {Partial<StudySession>} updates - 更新内容
+	 * @returns {void}
+	 */
+	update(sessionId, updates) {
+		/* ... */
+	},
 
-  /**
-   * 全データを削除
-   * @returns {void}
-   */
-  clear() { /* ... */ }
+	/**
+	 * 全データを削除
+	 * @returns {void}
+	 */
+	clear() {
+		/* ... */
+	}
 };
 ```
 
@@ -689,24 +700,30 @@ export const sessionsStorage = {
  */
 
 export const statsStorage = {
-  /**
-   * 統計データを読み込む
-   * @returns {StudyStats}
-   */
-  load() { /* ... */ },
+	/**
+	 * 統計データを読み込む
+	 * @returns {StudyStats}
+	 */
+	load() {
+		/* ... */
+	},
 
-  /**
-   * 統計データを保存
-   * @param {StudyStats} stats - 統計情報
-   * @returns {void}
-   */
-  save(stats) { /* ... */ },
+	/**
+	 * 統計データを保存
+	 * @param {StudyStats} stats - 統計情報
+	 * @returns {void}
+	 */
+	save(stats) {
+		/* ... */
+	},
 
-  /**
-   * 全データを削除
-   * @returns {void}
-   */
-  clear() { /* ... */ }
+	/**
+	 * 全データを削除
+	 * @returns {void}
+	 */
+	clear() {
+		/* ... */
+	}
 };
 ```
 
@@ -717,26 +734,26 @@ export const statsStorage = {
  * ストレージ容量超過エラー
  */
 export class StorageQuotaExceededError extends Error {
-  /**
-   * @param {string} message - エラーメッセージ
-   */
-  constructor(message) {
-    super(message);
-    this.name = 'StorageQuotaExceededError';
-  }
+	/**
+	 * @param {string} message - エラーメッセージ
+	 */
+	constructor(message) {
+		super(message);
+		this.name = 'StorageQuotaExceededError';
+	}
 }
 
 /**
  * データ破損エラー
  */
 export class DataCorruptionError extends Error {
-  /**
-   * @param {string} message - エラーメッセージ
-   */
-  constructor(message) {
-    super(message);
-    this.name = 'DataCorruptionError';
-  }
+	/**
+	 * @param {string} message - エラーメッセージ
+	 */
+	constructor(message) {
+		super(message);
+		this.name = 'DataCorruptionError';
+	}
 }
 ```
 
@@ -765,130 +782,134 @@ import { FSRS, Rating, State } from 'fsrs';
  * FSRS スケジューラのラッパー
  */
 export class StudyScheduler {
-  constructor() {
-    // FSRS を初期化（デフォルトパラメータ）
-    this.fsrs = new FSRS();
-  }
+	constructor() {
+		// FSRS を初期化（デフォルトパラメータ）
+		this.fsrs = new FSRS();
+	}
 
-  /**
-   * アプリの Rating を FSRS の Rating に変換
-   * @param {Rating} rating - アプリの評価
-   * @returns {import('fsrs').Rating} FSRS の Rating
-   * @private
-   */
-  mapRating(rating) {
-    switch (rating) {
-      case 'forgot':
-        return Rating.Again;
-      case 'remembered':
-        return Rating.Good;
-      case 'perfect':
-        return Rating.Easy;
-    }
-  }
+	/**
+	 * アプリの Rating を FSRS の Rating に変換
+	 * @param {Rating} rating - アプリの評価
+	 * @returns {import('fsrs').Rating} FSRS の Rating
+	 * @private
+	 */
+	mapRating(rating) {
+		switch (rating) {
+			case 'forgot':
+				return Rating.Again;
+			case 'remembered':
+				return Rating.Good;
+			case 'perfect':
+				return Rating.Easy;
+		}
+	}
 
-  /**
-   * FSRS の State をアプリの FSRSState に変換
-   * @param {import('fsrs').State} state - FSRS の State
-   * @returns {FSRSState}
-   * @private
-   */
-  mapState(state) {
-    switch (state) {
-      case State.New:
-        return 'New';
-      case State.Learning:
-        return 'Learning';
-      case State.Review:
-        return 'Review';
-      case State.Relearning:
-        return 'Relearning';
-    }
-  }
+	/**
+	 * FSRS の State をアプリの FSRSState に変換
+	 * @param {import('fsrs').State} state - FSRS の State
+	 * @returns {FSRSState}
+	 * @private
+	 */
+	mapState(state) {
+		switch (state) {
+			case State.New:
+				return 'New';
+			case State.Learning:
+				return 'Learning';
+			case State.Review:
+				return 'Review';
+			case State.Relearning:
+				return 'Relearning';
+		}
+	}
 
-  /**
-   * アプリの FSRSState を FSRS の State に変換
-   * @param {FSRSState} state - アプリの FSRSState
-   * @returns {import('fsrs').State}
-   * @private
-   */
-  mapStateToFSRS(state) {
-    switch (state) {
-      case 'New': return State.New;
-      case 'Learning': return State.Learning;
-      case 'Review': return State.Review;
-      case 'Relearning': return State.Relearning;
-    }
-  }
+	/**
+	 * アプリの FSRSState を FSRS の State に変換
+	 * @param {FSRSState} state - アプリの FSRSState
+	 * @returns {import('fsrs').State}
+	 * @private
+	 */
+	mapStateToFSRS(state) {
+		switch (state) {
+			case 'New':
+				return State.New;
+			case 'Learning':
+				return State.Learning;
+			case 'Review':
+				return State.Review;
+			case 'Relearning':
+				return State.Relearning;
+		}
+	}
 
-  /**
-   * 単語を学習してスケジュールを更新
-   * @param {string} word - 単語
-   * @param {WordProgress | null} currentProgress - 現在の進捗（新規の場合は null）
-   * @param {Rating} rating - 評価
-   * @param {Date} [now] - 現在時刻（デフォルト: new Date()）
-   * @returns {WordProgress} 更新後の進捗
-   */
-  schedule(word, currentProgress, rating, now = new Date()) {
-    const fsrsRating = this.mapRating(rating);
+	/**
+	 * 単語を学習してスケジュールを更新
+	 * @param {string} word - 単語
+	 * @param {WordProgress | null} currentProgress - 現在の進捗（新規の場合は null）
+	 * @param {Rating} rating - 評価
+	 * @param {Date} [now] - 現在時刻（デフォルト: new Date()）
+	 * @returns {WordProgress} 更新後の進捗
+	 */
+	schedule(word, currentProgress, rating, now = new Date()) {
+		const fsrsRating = this.mapRating(rating);
 
-    // 新規カードの場合
-    if (!currentProgress) {
-      const card = this.fsrs.newCard();
-      const schedulingCards = this.fsrs.repeat(card, now);
-      const nextCard = schedulingCards[fsrsRating].card;
+		// 新規カードの場合
+		if (!currentProgress) {
+			const card = this.fsrs.newCard();
+			const schedulingCards = this.fsrs.repeat(card, now);
+			const nextCard = schedulingCards[fsrsRating].card;
 
-      return {
-        word,
-        state: this.mapState(nextCard.state),
-        stability: nextCard.stability,
-        difficulty: nextCard.difficulty,
-        retrievability: 0,
-        elapsedDays: nextCard.elapsed_days,
-        scheduledDays: nextCard.scheduled_days,
-        reps: nextCard.reps,
-        lapses: nextCard.lapses,
-        lastReview: nextCard.last_review?.getTime() || now.getTime(),
-        due: nextCard.due.getTime(),
-        lastRating: rating,
-        correctCount: rating !== 'forgot' ? 1 : 0,
-        wrongCount: rating === 'forgot' ? 1 : 0,
-        totalStudyTimeSec: 0
-      };
-    }
+			return {
+				word,
+				state: this.mapState(nextCard.state),
+				stability: nextCard.stability,
+				difficulty: nextCard.difficulty,
+				retrievability: 0,
+				elapsedDays: nextCard.elapsed_days,
+				scheduledDays: nextCard.scheduled_days,
+				reps: nextCard.reps,
+				lapses: nextCard.lapses,
+				lastReview: nextCard.last_review?.getTime() || now.getTime(),
+				due: nextCard.due.getTime(),
+				lastRating: rating,
+				correctCount: rating !== 'forgot' ? 1 : 0,
+				wrongCount: rating === 'forgot' ? 1 : 0,
+				totalStudyTimeSec: 0
+			};
+		}
 
-    // 既存カードの更新
-    const card = {
-      due: new Date(currentProgress.due),
-      stability: currentProgress.stability,
-      difficulty: currentProgress.difficulty,
-      elapsed_days: currentProgress.elapsedDays,
-      scheduled_days: currentProgress.scheduledDays,
-      reps: currentProgress.reps,
-      lapses: currentProgress.lapses,
-      state: this.mapStateToFSRS(currentProgress.state),
-      last_review: new Date(currentProgress.lastReview)
-    };
+		// 既存カードの更新
+		const card = {
+			due: new Date(currentProgress.due),
+			stability: currentProgress.stability,
+			difficulty: currentProgress.difficulty,
+			elapsed_days: currentProgress.elapsedDays,
+			scheduled_days: currentProgress.scheduledDays,
+			reps: currentProgress.reps,
+			lapses: currentProgress.lapses,
+			state: this.mapStateToFSRS(currentProgress.state),
+			last_review: new Date(currentProgress.lastReview)
+		};
 
-    const schedulingCards = this.fsrs.repeat(card, now);
-    const nextCard = schedulingCards[fsrsRating].card;
+		const schedulingCards = this.fsrs.repeat(card, now);
+		const nextCard = schedulingCards[fsrsRating].card;
 
-    return {
-      ...currentProgress,
-      state: this.mapState(nextCard.state),
-      stability: nextCard.stability,
-      difficulty: nextCard.difficulty,
-      elapsedDays: nextCard.elapsed_days,
-      scheduledDays: nextCard.scheduled_days,
-      reps: nextCard.reps,
-      lapses: nextCard.lapses,
-      lastReview: nextCard.last_review?.getTime() || now.getTime(),
-      due: nextCard.due.getTime(),
-      lastRating: rating,
-      correctCount: currentProgress.correctCount + (rating !== 'forgot' ? 1 : 0),
-      wrongCount: currentProgress.wrongCount + (rating === 'forgot' ? 1 : 0)
-    };
-  }
+		return {
+			...currentProgress,
+			state: this.mapState(nextCard.state),
+			stability: nextCard.stability,
+			difficulty: nextCard.difficulty,
+			elapsedDays: nextCard.elapsed_days,
+			scheduledDays: nextCard.scheduled_days,
+			reps: nextCard.reps,
+			lapses: nextCard.lapses,
+			lastReview: nextCard.last_review?.getTime() || now.getTime(),
+			due: nextCard.due.getTime(),
+			lastRating: rating,
+			correctCount: currentProgress.correctCount + (rating !== 'forgot' ? 1 : 0),
+			wrongCount: currentProgress.wrongCount + (rating === 'forgot' ? 1 : 0)
+		};
+	}
 }
 
 // シングルトンインスタンス
@@ -912,20 +933,20 @@ priorityScore = baseScore × lastRatingFactor × overdueRatio
 
 **各要素の定義:**
 
-| 要素 | 説明 | 計算方法 |
-|------|------|----------|
-| `baseScore` | 基本スコア | 未学習: 100, 学習済み: 50 |
+| 要素               | 説明         | 計算方法                                   |
+| ------------------ | ------------ | ------------------------------------------ |
+| `baseScore`        | 基本スコア   | 未学習: 100, 学習済み: 50                  |
 | `lastRatingFactor` | 最終評価係数 | forgot: 1.5, remembered: 1.2, perfect: 1.0 |
-| `overdueRatio` | 期限超過率 | `max(1, elapsedDays / scheduledDays)` |
+| `overdueRatio`     | 期限超過率   | `max(1, elapsedDays / scheduledDays)`      |
 
 **計算例:**
 
-| 状態 | baseScore | lastRatingFactor | overdueRatio | priorityScore |
-|------|-----------|------------------|--------------|---------------|
-| 未学習 | 100 | 1.0 | 1.0 | 100 |
-| 前回forgot、3日経過/予定1日 | 50 | 1.5 | 3.0 | 225 |
-| 前回remembered、7日経過/予定7日 | 50 | 1.2 | 1.0 | 60 |
-| 前回perfect、30日経過/予定30日 | 50 | 1.0 | 1.0 | 50 |
+| 状態                            | baseScore | lastRatingFactor | overdueRatio | priorityScore |
+| ------------------------------- | --------- | ---------------- | ------------ | ------------- |
+| 未学習                          | 100       | 1.0              | 1.0          | 100           |
+| 前回forgot、3日経過/予定1日     | 50        | 1.5              | 3.0          | 225           |
+| 前回remembered、7日経過/予定7日 | 50        | 1.2              | 1.0          | 60            |
+| 前回perfect、30日経過/予定30日  | 50        | 1.0              | 1.0          | 50            |
 
 #### 実装
 
@@ -936,26 +957,27 @@ priorityScore = baseScore × lastRatingFactor × overdueRatio
  * @returns {number} 優先度スコア（高いほど優先）
  */
 function calculatePriorityScore(progress) {
-  // 未学習の単語
-  if (!progress) {
-    return 100;
-  }
+	// 未学習の単語
+	if (!progress) {
+		return 100;
+	}
 
-  // 基本スコア
-  const baseScore = 50;
+	// 基本スコア
+	const baseScore = 50;
 
-  // 最終評価係数
-  const lastRatingFactor = {
-    forgot: 1.5,
-    remembered: 1.2,
-    perfect: 1.0
-  }[progress.lastRating] || 1.0;
+	// 最終評価係数
+	const lastRatingFactor =
+		{
+			forgot: 1.5,
+			remembered: 1.2,
+			perfect: 1.0
+		}[progress.lastRating] || 1.0;
 
-  // 期限超過率（最小1.0）
-  const elapsedDays = (Date.now() - progress.lastReview) / (1000 * 60 * 60 * 24);
-  const overdueRatio = Math.max(1, elapsedDays / Math.max(1, progress.scheduledDays));
+	// 期限超過率（最小1.0）
+	const elapsedDays = (Date.now() - progress.lastReview) / (1000 * 60 * 60 * 24);
+	const overdueRatio = Math.max(1, elapsedDays / Math.max(1, progress.scheduledDays));
 
-  return baseScore * lastRatingFactor * overdueRatio;
+	return baseScore * lastRatingFactor * overdueRatio;
 }
 ```
 
@@ -971,58 +993,56 @@ function calculatePriorityScore(progress) {
 // 型定義は同じファイル内で定義済み（上記の StudySet を参照）
 
 export class StudyQueue {
-  /**
-   * 5単語を選択して学習セットを作成
-   * priorityScore が高い順に選択
-   * @param {WordData[]} words - 全単語データ
-   * @param {ProgressMap} progressMap - 進捗データ
-   * @returns {string[]} 選択された5単語
-   */
-  selectWords(words, progressMap) {
-    const wordList = words.map(w => w.word);
+	/**
+	 * 5単語を選択して学習セットを作成
+	 * priorityScore が高い順に選択
+	 * @param {WordData[]} words - 全単語データ
+	 * @param {ProgressMap} progressMap - 進捗データ
+	 * @returns {string[]} 選択された5単語
+	 */
+	selectWords(words, progressMap) {
+		const wordList = words.map((w) => w.word);
 
-    // 全単語の優先度スコアを計算してソート
-    const scoredWords = wordList.map(word => ({
-      word,
-      score: calculatePriorityScore(progressMap[word] || null)
-    }));
+		// 全単語の優先度スコアを計算してソート
+		const scoredWords = wordList.map((word) => ({
+			word,
+			score: calculatePriorityScore(progressMap[word] || null)
+		}));
 
-    // スコアが高い順にソート
-    scoredWords.sort((a, b) => b.score - a.score);
+		// スコアが高い順にソート
+		scoredWords.sort((a, b) => b.score - a.score);
 
-    // 上位5単語を選択
-    return scoredWords.slice(0, 5).map(item => item.word);
-  }
+		// 上位5単語を選択
+		return scoredWords.slice(0, 5).map((item) => item.word);
+	}
 
-  /**
-   * セット内の次の単語を取得
-   * @param {StudySet} set - 学習セット
-   * @returns {string | null} 次の単語（完了時は null）
-   */
-  getNextWord(set) {
-    const remaining = set.words.filter(
-      word => !set.completedWords.has(word)
-    );
+	/**
+	 * セット内の次の単語を取得
+	 * @param {StudySet} set - 学習セット
+	 * @returns {string | null} 次の単語（完了時は null）
+	 */
+	getNextWord(set) {
+		const remaining = set.words.filter((word) => !set.completedWords.has(word));
 
-    if (remaining.length === 0) return null;
+		if (remaining.length === 0) return null;
 
-    // Forgot を選択した単語を優先的に出題
-    const forgotRemaining = remaining.filter(w => set.forgotWords.has(w));
-    if (forgotRemaining.length > 0) {
-      return forgotRemaining[0];
-    }
+		// Forgot を選択した単語を優先的に出題
+		const forgotRemaining = remaining.filter((w) => set.forgotWords.has(w));
+		if (forgotRemaining.length > 0) {
+			return forgotRemaining[0];
+		}
 
-    return remaining[0];
-  }
+		return remaining[0];
+	}
 
-  /**
-   * セットが完了したか判定
-   * @param {StudySet} set - 学習セット
-   * @returns {boolean}
-   */
-  isSetComplete(set) {
-    return set.completedWords.size === set.words.length;
-  }
+	/**
+	 * セットが完了したか判定
+	 * @param {StudySet} set - 学習セット
+	 * @returns {boolean}
+	 */
+	isSetComplete(set) {
+		return set.completedWords.size === set.words.length;
+	}
 }
 
 // シングルトンインスタンス
@@ -1040,6 +1060,7 @@ export const studyQueue = new StudyQueue();
 **責務:** 単語カードの表示
 
 **Props:**
+
 ```javascript
 /** @type {WordData} */
 export let wordData;
@@ -1052,6 +1073,7 @@ export let onSpeakWord;
 ```
 
 **表示内容:**
+
 - 英単語、発音記号、品詞
 - 意味（表示/非表示切り替え可能）
 - 例文と訳
@@ -1062,6 +1084,7 @@ export let onSpeakWord;
 **責務:** 評価ボタンの表示
 
 **Props:**
+
 ```javascript
 /** @type {(rating: Rating) => void} */
 export let onRate;
@@ -1071,6 +1094,7 @@ export let hidePerfect = false;
 ```
 
 **表示:**
+
 - `Forgot` ボタン（赤）
 - `Perfect` ボタン（オレンジ、条件により非表示）
 - `Remembered` ボタン（青）
@@ -1080,6 +1104,7 @@ export let hidePerfect = false;
 **責務:** セッション制御のフローティングボタン
 
 **Props:**
+
 ```javascript
 /** @type {boolean} */
 export let isActive;
@@ -1096,6 +1121,7 @@ export let onStop;
 **責務:** 学習進捗の表示
 
 **Props:**
+
 ```javascript
 /** @type {number} */
 export let todayCount;
@@ -1139,51 +1165,51 @@ export let setProgress;
  * @returns {ValidationResult}
  */
 export function validateWords(words) {
-  /** @type {ValidationError[]} */
-  const errors = [];
+	/** @type {ValidationError[]} */
+	const errors = [];
 
-  words.forEach((word, index) => {
-    // 必須フィールド: word
-    if (typeof word !== 'object' || word === null) {
-      errors.push({
-        index,
-        field: 'word',
-        message: 'Word must be an object'
-      });
-      return;
-    }
+	words.forEach((word, index) => {
+		// 必須フィールド: word
+		if (typeof word !== 'object' || word === null) {
+			errors.push({
+				index,
+				field: 'word',
+				message: 'Word must be an object'
+			});
+			return;
+		}
 
-    const w = /** @type {Record<string, unknown>} */ (word);
+		const w = /** @type {Record<string, unknown>} */ (word);
 
-    // word フィールド
-    if (!w.word || typeof w.word !== 'string') {
-      errors.push({
-        index,
-        field: 'word',
-        message: 'Missing or invalid "word" field'
-      });
-    }
+		// word フィールド
+		if (!w.word || typeof w.word !== 'string') {
+			errors.push({
+				index,
+				field: 'word',
+				message: 'Missing or invalid "word" field'
+			});
+		}
 
-    // meaning フィールド
-    if (!w.meaning || typeof w.meaning !== 'string') {
-      errors.push({
-        index,
-        field: 'meaning',
-        message: 'Missing or invalid "meaning" field'
-      });
-    }
+		// meaning フィールド
+		if (!w.meaning || typeof w.meaning !== 'string') {
+			errors.push({
+				index,
+				field: 'meaning',
+				message: 'Missing or invalid "meaning" field'
+			});
+		}
 
-    // オプションフィールドの型チェック
-    if (w.pronunciation && typeof w.pronunciation !== 'string') {
-      errors.push({ index, field: 'pronunciation', message: 'Invalid type' });
-    }
-    // ... 他のフィールド
-  });
+		// オプションフィールドの型チェック
+		if (w.pronunciation && typeof w.pronunciation !== 'string') {
+			errors.push({ index, field: 'pronunciation', message: 'Invalid type' });
+		}
+		// ... 他のフィールド
+	});
 
-  return {
-    valid: errors.length === 0,
-    errors
-  };
+	return {
+		valid: errors.length === 0,
+		errors
+	};
 }
 
 /**
@@ -1192,19 +1218,19 @@ export function validateWords(words) {
  * @returns {string[]} 重複している単語のリスト
  */
 export function checkDuplicates(words) {
-  const seen = new Set();
-  /** @type {string[]} */
-  const duplicates = [];
+	const seen = new Set();
+	/** @type {string[]} */
+	const duplicates = [];
 
-  words.forEach(word => {
-    if (seen.has(word.word)) {
-      duplicates.push(word.word);
-    } else {
-      seen.add(word.word);
-    }
-  });
+	words.forEach((word) => {
+		if (seen.has(word.word)) {
+			duplicates.push(word.word);
+		} else {
+			seen.add(word.word);
+		}
+	});
 
-  return duplicates;
+	return duplicates;
 }
 ```
 
@@ -1259,12 +1285,12 @@ export function checkDuplicates(words) {
  * @returns {Rating[]} 利用可能な評価のリスト
  */
 function getAvailableRatings(word, set) {
-  // セット内で Forgot を選択済みの単語は Perfect を非表示
-  if (set.forgotWords.has(word)) {
-    return ['forgot', 'remembered'];
-  }
+	// セット内で Forgot を選択済みの単語は Perfect を非表示
+	if (set.forgotWords.has(word)) {
+		return ['forgot', 'remembered'];
+	}
 
-  return ['forgot', 'perfect', 'remembered'];
+	return ['forgot', 'perfect', 'remembered'];
 }
 ```
 
@@ -1277,23 +1303,22 @@ function getAvailableRatings(word, set) {
 複数の JSON ファイルに分割可能です。アプリ起動時に設定ファイルから読み込むファイルを指定します。
 
 **設定ファイル例（`words-config.json`）：**
+
 ```json
 {
-  "wordFiles": [
-    "/data/basic.json",
-    "/data/advanced.json",
-    "/data/business.json"
-  ]
+	"wordFiles": ["/data/basic.json", "/data/advanced.json", "/data/business.json"]
 }
 ```
 
 ### データ形式
 
 **必須フィールド:**
+
 - `word`: 英単語（一意な識別子）
 - `meaning`: 日本語の意味
 
 **オプションフィールド:**
+
 - `pronunciation`: 発音記号
 - `katakana`: カタカナ読み
 - `type`: 品詞
@@ -1306,49 +1331,50 @@ function getAvailableRatings(word, set) {
 - `derivatives`: 派生語リスト（オブジェクト配列で、各派生語の詳細情報を含む）
 
 **サンプル:**
+
 ```json
 [
-  {
-    "word": "unveil",
-    "pronunciation": "/ʌnˈveɪl/",
-    "katakana": "アンヴェイル",
-    "type": "動詞",
-    "meaning": "発表する・公開する・お披露目する",
-    "contextMeaning": "（新しいサポートポートフォリオを）発表した",
-    "example": "Wow, what an exciting week it's been at re:Invent, and a huge week for Support where we unveiled a completely revamped Support portfolio",
-    "translation": "re:Inventで完全に刷新されたサポートポートフォリオを発表した、サポートにとって大きな週となった"
-  },
-  {
-    "word": "significantly",
-    "pronunciation": "/sɪɡˈnɪfɪkəntli/",
-    "katakana": "シグニフィカントリー",
-    "type": "副詞",
-    "meaning": "大幅に・著しく・かなり",
-    "contextMeaning": "大幅に（より強力になる）",
-    "example": "which becomes significantly stronger with new security incident monitoring and response",
-    "translation": "新しいセキュリティインシデント監視と対応により、大幅により強力になる",
-    "derivatives": [
-      {
-        "word": "significant",
-        "pronunciation": "/sɪɡˈnɪfɪkənt/",
-        "katakana": "シグニフィカント",
-        "type": "形容詞",
-        "meaning": "重要な・大きな・著しい",
-        "example": "marking a significant evolution（重要な進化を示す）"
-      }
-    ]
-  },
-  {
-    "word": "synthetic",
-    "pronunciation": "/sɪnˈθetɪk/",
-    "katakana": "シンセティック",
-    "type": "形容詞",
-    "meaning": "合成の・人工的な・合成された",
-    "contextMeaning": "合成の（データセット）",
-    "note": "実際のデータから統計的特性を学習して人工的に生成されたデータのことで、元のデータの統計的パターンは保持しながらも、個人を特定できないように作られたデータセットを表しています",
-    "example": "generating synthetic datasets that preserve statistical patterns",
-    "translation": "統計的パターンを保持する合成データセットを生成する"
-  }
+	{
+		"word": "unveil",
+		"pronunciation": "/ʌnˈveɪl/",
+		"katakana": "アンヴェイル",
+		"type": "動詞",
+		"meaning": "発表する・公開する・お披露目する",
+		"contextMeaning": "（新しいサポートポートフォリオを）発表した",
+		"example": "Wow, what an exciting week it's been at re:Invent, and a huge week for Support where we unveiled a completely revamped Support portfolio",
+		"translation": "re:Inventで完全に刷新されたサポートポートフォリオを発表した、サポートにとって大きな週となった"
+	},
+	{
+		"word": "significantly",
+		"pronunciation": "/sɪɡˈnɪfɪkəntli/",
+		"katakana": "シグニフィカントリー",
+		"type": "副詞",
+		"meaning": "大幅に・著しく・かなり",
+		"contextMeaning": "大幅に（より強力になる）",
+		"example": "which becomes significantly stronger with new security incident monitoring and response",
+		"translation": "新しいセキュリティインシデント監視と対応により、大幅により強力になる",
+		"derivatives": [
+			{
+				"word": "significant",
+				"pronunciation": "/sɪɡˈnɪfɪkənt/",
+				"katakana": "シグニフィカント",
+				"type": "形容詞",
+				"meaning": "重要な・大きな・著しい",
+				"example": "marking a significant evolution（重要な進化を示す）"
+			}
+		]
+	},
+	{
+		"word": "synthetic",
+		"pronunciation": "/sɪnˈθetɪk/",
+		"katakana": "シンセティック",
+		"type": "形容詞",
+		"meaning": "合成の・人工的な・合成された",
+		"contextMeaning": "合成の（データセット）",
+		"note": "実際のデータから統計的特性を学習して人工的に生成されたデータのことで、元のデータの統計的パターンは保持しながらも、個人を特定できないように作られたデータセットを表しています",
+		"example": "generating synthetic datasets that preserve statistical patterns",
+		"translation": "統計的パターンを保持する合成データセットを生成する"
+	}
 ]
 ```
 
@@ -1423,16 +1449,19 @@ FSRSアルゴリズムで使用するパラメータを含む進捗情報：
 このアプリでは **FSRS (Free Spaced Repetition Scheduler)** を採用します。
 
 **FSRSの特徴:**
+
 - **機械学習ベース**: 2万人のユーザーから7億件のレビューデータで学習された最新アルゴリズム（2023年開発）
 - **高精度な記憶予測**: 個人の学習履歴を分析し、最適な復習タイミングを提案
 - **効率性**: 従来のSM-2と比較して20-30%の復習回数削減を実現
 - **実績**: Anki、RemNoteなどの主要SRSアプリで採用
 
 **実装:**
+
 - JavaScript実装: [fsrs.js](https://github.com/open-spaced-repetition/fsrs.js)
 - npm パッケージとして提供
 
 **FSRSのパラメータ:**
+
 - **Stability (S)**: 記憶の安定性（日数で表現）
 - **Difficulty (D)**: 単語の難易度（0-10のスケール）
 - **Retrievability (R)**: 現時点での想起可能性（0-1の確率）
@@ -1441,11 +1470,11 @@ FSRSアルゴリズムで使用するパラメータを含む進捗情報：
 
 ユーザー操作とFSRS評価の対応：
 
-| ユーザーボタン | 内部 rating | FSRS Rating |
-|---------------|-------------|-------------|
-| `Forgot` | `forgot` | `Again` (1) |
-| `Remembered` | `remembered` | `Good` (3) |
-| `Perfect` | `perfect` | `Easy` (4) |
+| ユーザーボタン | 内部 rating  | FSRS Rating |
+| -------------- | ------------ | ----------- |
+| `Forgot`       | `forgot`     | `Again` (1) |
+| `Remembered`   | `remembered` | `Good` (3)  |
+| `Perfect`      | `perfect`    | `Easy` (4)  |
 
 ### 出題アルゴリズム（5単語1セット制）
 
@@ -1458,6 +1487,7 @@ FSRSアルゴリズムで使用するパラメータを含む進捗情報：
 上記から **5単語を選択** して1セットとする。
 
 **セット内ルール:**
+
 - セット内の全単語が `Remembered` または `Perfect` になるまで繰り返し出題
 - セット内で `Forgot` を選択した単語の再出題時は、`Perfect` 選択肢を非表示
 
@@ -1468,6 +1498,7 @@ FSRSアルゴリズムで使用するパラメータを含む進捗情報：
 ### 音声再生
 
 **Web Speech API の実装例:**
+
 ```javascript
 const utterance = new SpeechSynthesisUtterance(word);
 utterance.lang = 'en-US'; // または 'en-GB'
@@ -1476,6 +1507,7 @@ window.speechSynthesis.speak(utterance);
 ```
 
 **注意事項:**
+
 - ブラウザ・OS 依存で音声品質にばらつきあり
 - オフラインでも動作（ブラウザに音声エンジンが含まれている場合）
 - iOS Safari ではユーザー操作（タップ）トリガーが必要
@@ -1483,6 +1515,7 @@ window.speechSynthesis.speak(utterance);
 ### 時間計測
 
 **実装方法:**
+
 - カード表示時に `shownAt` をタイムスタンプで記録
 - 回答ボタンクリック時に `timeSpentSec = now - shownAt` を計算
 - 学習ログと進捗データの両方に反映
@@ -1493,11 +1526,11 @@ Report画面では、FSRS内部の状態を以下のようにユーザー向け�
 
 **表示用の状態:**
 
-| 表示状態 | 定義 |
-|---------|------|
-| `Stable` | `state === 'Review'` かつ `scheduledDays >= 30` の単語 |
+| 表示状態   | 定義                                                                                      |
+| ---------- | ----------------------------------------------------------------------------------------- |
+| `Stable`   | `state === 'Review'` かつ `scheduledDays >= 30` の単語                                    |
 | `Learning` | `state === 'Learning'` または `state === 'Relearning'` または `state === 'Review'` の単語 |
-| `New` | `state === 'New'` の単語（未学習） |
+| `New`      | `state === 'New'` の単語（未学習）                                                        |
 
 **実装例:**
 
@@ -1517,28 +1550,30 @@ Report画面では、FSRS内部の状態を以下のようにユーザー向け�
  * @returns {DisplayState} 表示用の状態
  */
 function getDisplayState(progress) {
-  // 未学習
-  if (!progress || progress.state === 'New') {
-    return 'New';
-  }
+	// 未学習
+	if (!progress || progress.state === 'New') {
+		return 'New';
+	}
 
-  // 安定状態（長期記憶）
-  if (progress.state === 'Review' && progress.scheduledDays >= 30) {
-    return 'Stable';
-  }
+	// 安定状態（長期記憶）
+	if (progress.state === 'Review' && progress.scheduledDays >= 30) {
+		return 'Stable';
+	}
 
-  // 学習中
-  return 'Learning';
+	// 学習中
+	return 'Learning';
 }
 ```
 
 **注意:**
+
 - FSRS内部では「Review」という状態を使用しますが、ユーザー向けには「Study（学習）」と表記します
 - 技術的な状態（FSRS State）とユーザー向けの表示状態は明確に区別します
 
 ### データのインポート/エクスポート
 
 **エクスポート形式:**
+
 ```json
 {
   "exportedAt": "2024-01-15T10:30:00Z",
@@ -1550,6 +1585,7 @@ function getDisplayState(progress) {
 ```
 
 **インポート動作:**
+
 - ファイルアップロード時に形式の妥当性をチェック
 - **既存データを完全に上書き**（マージは行わない）
 - インポート完了後、画面をリロード
@@ -1561,11 +1597,13 @@ function getDisplayState(progress) {
 ### JSON 読み込みエラー
 
 **チェック内容:**
+
 - 必須フィールド（`word`, `meaning`）の欠損
 - データ型の検証
 - JSON パースエラー
 
 **エラー表示例:**
+
 ```
 Error: Failed to load word data
 
@@ -1578,11 +1616,13 @@ Please fix the file and reload the page.
 ### localStorage 書き込みエラー
 
 **発生する状況:**
+
 - ストレージ容量の上限（通常 5〜10MB）
 - プライベートモード
 - ブラウザの設定で無効化されている
 
 **エラー表示例:**
+
 ```
 Warning: Failed to save data
 
@@ -1601,6 +1641,7 @@ Solutions:
 詳細な開発手順とコマンドについては [README.md](../README.md) を参照してください。
 
 **主要コマンド:**
+
 - `npm install`: 依存関係のインストール
 - `npm run dev`: 開発サーバー起動
 - `npm run build`: 本番ビルド

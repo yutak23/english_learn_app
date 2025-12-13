@@ -1,7 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
 	import { statsStore, loadStats } from '$lib/stores/stats.js';
-	import { progressStore, loadProgress, learnedWordCount } from '$lib/stores/progress.js';
+	import { loadProgress, learnedWordCount } from '$lib/stores/progress.js';
 	import { logsStorage } from '$lib/storage/logs.js';
 
 	let todayCount = $state(0);

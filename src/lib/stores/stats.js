@@ -1,5 +1,6 @@
-import { writable, derived } from 'svelte/store';
+import { writable } from 'svelte/store';
 import { statsStorage } from '../storage/stats.js';
+import { getTodayDateString, getYesterdayDateString } from '../utils/date.js';
 
 /**
  * 学習統計情報
@@ -17,30 +18,6 @@ export const statsStore = writable({
 	totalStudies: 0,
 	lastStudyDate: ''
 });
-
-/**
- * 今日の日付を取得（JST）
- * @returns {string} YYYY-MM-DD 形式
- */
-function getTodayDateString() {
-	const now = new Date();
-	// JST（UTC+9）に調整
-	const jstOffset = 9 * 60;
-	const jstDate = new Date(now.getTime() + jstOffset * 60 * 1000);
-	return jstDate.toISOString().split('T')[0];
-}
-
-/**
- * 昨日の日付を取得（JST）
- * @returns {string} YYYY-MM-DD 形式
- */
-function getYesterdayDateString() {
-	const now = new Date();
-	const jstOffset = 9 * 60;
-	const jstDate = new Date(now.getTime() + jstOffset * 60 * 1000);
-	jstDate.setDate(jstDate.getDate() - 1);
-	return jstDate.toISOString().split('T')[0];
-}
 
 /**
  * localStorage から統計データを読み込む

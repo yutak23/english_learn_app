@@ -19,7 +19,9 @@
 		<div class="set-progress-bar">
 			<div
 				class="set-progress-fill"
-				style="width: {setProgress.total > 0 ? (setProgress.current / setProgress.total) * 100 : 0}%"
+				style="width: {setProgress.total > 0
+					? (setProgress.current / setProgress.total) * 100
+					: 0}%"
 			></div>
 		</div>
 		<span class="set-progress-text">{setProgress.current} / {setProgress.total}</span>
