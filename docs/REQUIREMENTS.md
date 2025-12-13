@@ -78,7 +78,8 @@
 - `translation`: 例文の訳
 - `sentenceBreakdown`: 文の構造解析
 - `wordByWordTranslation`: 単語ごとの訳
-- `derivatives`: 派生語リスト
+- `note`: 補足説明・注釈
+- `derivatives`: 派生語リスト（オブジェクト配列で、各派生語の詳細情報を含む）
 
 データ形式の詳細とサンプルは [DESIGN.md](./DESIGN.md) を参照してください。
 
