@@ -117,6 +117,17 @@ src/
 
 ```javascript
 /**
+ * 派生語データ
+ * @typedef {Object} DerivativeWord
+ * @property {string} word - 派生語
+ * @property {string} [pronunciation] - 発音記号
+ * @property {string} [katakana] - カタカナ読み
+ * @property {string} [type] - 品詞
+ * @property {string} [meaning] - 意味
+ * @property {string} [example] - 例文
+ */
+
+/**
  * JSON から読み込む単語データ
  * @typedef {Object} WordData
  * @property {string} word - 必須: 英単語（一意な識別子）
@@ -129,7 +140,8 @@ src/
  * @property {string} [translation] - 例文の訳
  * @property {string} [sentenceBreakdown] - 文の構造解析
  * @property {string} [wordByWordTranslation] - 単語ごとの訳
- * @property {string[]} [derivatives] - 派生語リスト
+ * @property {string} [note] - 補足説明・注釈
+ * @property {DerivativeWord[]} [derivatives] - 派生語リスト
  */
 
 /**
@@ -1290,7 +1302,8 @@ function getAvailableRatings(word, set) {
 - `translation`: 例文の訳
 - `sentenceBreakdown`: 文の構造解析
 - `wordByWordTranslation`: 単語ごとの訳
-- `derivatives`: 派生語リスト
+- `note`: 補足説明・注釈
+- `derivatives`: 派生語リスト（オブジェクト配列で、各派生語の詳細情報を含む）
 
 **サンプル:**
 ```json
@@ -1304,6 +1317,37 @@ function getAvailableRatings(word, set) {
     "contextMeaning": "（新しいサポートポートフォリオを）発表した",
     "example": "Wow, what an exciting week it's been at re:Invent, and a huge week for Support where we unveiled a completely revamped Support portfolio",
     "translation": "re:Inventで完全に刷新されたサポートポートフォリオを発表した、サポートにとって大きな週となった"
+  },
+  {
+    "word": "significantly",
+    "pronunciation": "/sɪɡˈnɪfɪkəntli/",
+    "katakana": "シグニフィカントリー",
+    "type": "副詞",
+    "meaning": "大幅に・著しく・かなり",
+    "contextMeaning": "大幅に（より強力になる）",
+    "example": "which becomes significantly stronger with new security incident monitoring and response",
+    "translation": "新しいセキュリティインシデント監視と対応により、大幅により強力になる",
+    "derivatives": [
+      {
+        "word": "significant",
+        "pronunciation": "/sɪɡˈnɪfɪkənt/",
+        "katakana": "シグニフィカント",
+        "type": "形容詞",
+        "meaning": "重要な・大きな・著しい",
+        "example": "marking a significant evolution（重要な進化を示す）"
+      }
+    ]
+  },
+  {
+    "word": "synthetic",
+    "pronunciation": "/sɪnˈθetɪk/",
+    "katakana": "シンセティック",
+    "type": "形容詞",
+    "meaning": "合成の・人工的な・合成された",
+    "contextMeaning": "合成の（データセット）",
+    "note": "実際のデータから統計的特性を学習して人工的に生成されたデータのことで、元のデータの統計的パターンは保持しながらも、個人を特定できないように作られたデータセットを表しています",
+    "example": "generating synthetic datasets that preserve statistical patterns",
+    "translation": "統計的パターンを保持する合成データセットを生成する"
   }
 ]
 ```
