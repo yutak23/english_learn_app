@@ -171,10 +171,10 @@ src/
  * @property {number} lapses - 忘れた回数
  * @property {number} lastReview - 最終学習時刻（タイムスタンプ）
  * @property {number} due - 次回出題時刻（タイムスタンプ）
+ * @property {Rating} lastRating - 最後の評価（優先度スコア計算用）
  * @property {number} correctCount - Forgot 以外の回答数
  * @property {number} wrongCount - Forgot の回数
  * @property {number} totalStudyTimeSec - 累計学習時間（秒）
- * @property {boolean} isMastered - Perfect を選択してマスター済みかどうか
  */
 
 /**
@@ -838,10 +838,10 @@ export class StudyScheduler {
         lapses: nextCard.lapses,
         lastReview: nextCard.last_review?.getTime() || now.getTime(),
         due: nextCard.due.getTime(),
+        lastRating: rating,
         correctCount: rating !== 'forgot' ? 1 : 0,
         wrongCount: rating === 'forgot' ? 1 : 0,
-        totalStudyTimeSec: 0,
-        isMastered: rating === 'perfect'
+        totalStudyTimeSec: 0
       };
     }
 
@@ -872,9 +872,9 @@ export class StudyScheduler {
       lapses: nextCard.lapses,
       lastReview: nextCard.last_review?.getTime() || now.getTime(),
       due: nextCard.due.getTime(),
+      lastRating: rating,
       correctCount: currentProgress.correctCount + (rating !== 'forgot' ? 1 : 0),
-      wrongCount: currentProgress.wrongCount + (rating === 'forgot' ? 1 : 0),
-      isMastered: currentProgress.isMastered || rating === 'perfect'
+      wrongCount: currentProgress.wrongCount + (rating === 'forgot' ? 1 : 0)
     };
   }
 }
@@ -886,6 +886,66 @@ export const scheduler = new StudyScheduler();
 ---
 
 ## 学習フロー（Study Queue）設計
+
+### 出題優先度スコア
+
+単語の出題順序を決定するため、統一した数値基準として **優先度スコア（priorityScore）** を使用します。
+スコアが高い単語ほど優先的に出題されます。
+
+#### スコア計算式
+
+```
+priorityScore = baseScore × lastRatingFactor × overdueRatio
+```
+
+**各要素の定義:**
+
+| 要素 | 説明 | 計算方法 |
+|------|------|----------|
+| `baseScore` | 基本スコア | 未学習: 100, 学習済み: 50 |
+| `lastRatingFactor` | 最終評価係数 | forgot: 1.5, remembered: 1.2, perfect: 1.0 |
+| `overdueRatio` | 期限超過率 | `max(1, elapsedDays / scheduledDays)` |
+
+**計算例:**
+
+| 状態 | baseScore | lastRatingFactor | overdueRatio | priorityScore |
+|------|-----------|------------------|--------------|---------------|
+| 未学習 | 100 | 1.0 | 1.0 | 100 |
+| 前回forgot、3日経過/予定1日 | 50 | 1.5 | 3.0 | 225 |
+| 前回remembered、7日経過/予定7日 | 50 | 1.2 | 1.0 | 60 |
+| 前回perfect、30日経過/予定30日 | 50 | 1.0 | 1.0 | 50 |
+
+#### 実装
+
+```javascript
+/**
+ * 単語の出題優先度スコアを計算
+ * @param {WordProgress | null} progress - 単語の進捗情報（未学習の場合は null）
+ * @returns {number} 優先度スコア（高いほど優先）
+ */
+function calculatePriorityScore(progress) {
+  // 未学習の単語
+  if (!progress) {
+    return 100;
+  }
+
+  // 基本スコア
+  const baseScore = 50;
+
+  // 最終評価係数
+  const lastRatingFactor = {
+    forgot: 1.5,
+    remembered: 1.2,
+    perfect: 1.0
+  }[progress.lastRating] || 1.0;
+
+  // 期限超過率（最小1.0）
+  const elapsedDays = (Date.now() - progress.lastReview) / (1000 * 60 * 60 * 24);
+  const overdueRatio = Math.max(1, elapsedDays / Math.max(1, progress.scheduledDays));
+
+  return baseScore * lastRatingFactor * overdueRatio;
+}
+```
 
 ### 出題管理 (`src/lib/services/studyQueue.js`)
 
@@ -901,60 +961,25 @@ export const scheduler = new StudyScheduler();
 export class StudyQueue {
   /**
    * 5単語を選択して学習セットを作成
+   * priorityScore が高い順に選択
    * @param {WordData[]} words - 全単語データ
    * @param {ProgressMap} progressMap - 進捗データ
    * @returns {string[]} 選択された5単語
    */
   selectWords(words, progressMap) {
-    const now = Date.now();
     const wordList = words.map(w => w.word);
 
-    // 優先度1: 期限切れカード
-    const dueCards = wordList
-      .filter(word => {
-        const progress = progressMap[word];
-        return progress && progress.due <= now;
-      })
-      .sort((a, b) => {
-        const progressA = progressMap[a];
-        const progressB = progressMap[b];
-        return progressA.due - progressB.due; // 期限超過時間が長い順
-      });
+    // 全単語の優先度スコアを計算してソート
+    const scoredWords = wordList.map(word => ({
+      word,
+      score: calculatePriorityScore(progressMap[word] || null)
+    }));
 
-    // 優先度2: 未出題カード
-    const newCards = wordList.filter(word => !progressMap[word]);
+    // スコアが高い順にソート
+    scoredWords.sort((a, b) => b.score - a.score);
 
-    // 優先度3: 長期記憶カード
-    const longTermCards = wordList
-      .filter(word => {
-        const progress = progressMap[word];
-        return progress && progress.scheduledDays >= 30;
-      })
-      .sort((a, b) => {
-        const progressA = progressMap[a];
-        const progressB = progressMap[b];
-        return progressA.lastReview - progressB.lastReview; // 古い順
-      });
-
-    // 5単語を選択
-    const selected = [];
-    const allCandidates = [...dueCards, ...newCards, ...longTermCards];
-
-    for (const word of allCandidates) {
-      if (!selected.includes(word)) {
-        selected.push(word);
-      }
-      if (selected.length >= 5) break;
-    }
-
-    // 5単語に満たない場合はランダムに追加
-    if (selected.length < 5) {
-      const remaining = wordList.filter(w => !selected.includes(w));
-      const shuffled = remaining.sort(() => Math.random() - 0.5);
-      selected.push(...shuffled.slice(0, 5 - selected.length));
-    }
-
-    return selected.slice(0, 5);
+    // 上位5単語を選択
+    return scoredWords.slice(0, 5).map(item => item.word);
   }
 
   /**
@@ -1035,8 +1060,8 @@ export let hidePerfect = false;
 
 **表示:**
 - `Forgot` ボタン（赤）
-- `Remembered` ボタン（黄）
-- `Perfect` ボタン（緑、条件により非表示）
+- `Perfect` ボタン（オレンジ、条件により非表示）
+- `Remembered` ボタン（青）
 
 #### 3. SessionControl (`src/lib/components/SessionControl.svelte`)
 
@@ -1216,6 +1241,7 @@ export function checkDuplicates(words) {
 ```javascript
 /**
  * 利用可能な評価ボタンを取得
+ * ボタン順序: Forgot（赤）、Perfect（オレンジ）、Remembered（青）
  * @param {string} word - 単語
  * @param {StudySet} set - 学習セット
  * @returns {Rating[]} 利用可能な評価のリスト
@@ -1226,7 +1252,7 @@ function getAvailableRatings(word, set) {
     return ['forgot', 'remembered'];
   }
 
-  return ['forgot', 'remembered', 'perfect'];
+  return ['forgot', 'perfect', 'remembered'];
 }
 ```
 
@@ -1301,10 +1327,10 @@ FSRSアルゴリズムで使用するパラメータを含む進捗情報：
 - `lapses`: 忘れた回数
 - `lastReview`: 最終学習時刻（タイムスタンプ）
 - `due`: 次回出題時刻（タイムスタンプ）
+- `lastRating`: 最後の評価（`forgot` | `remembered` | `perfect`、優先度スコア計算用）
 - `correctCount`: `Forgot` 以外の回答数
 - `wrongCount`: `Forgot` の回数
 - `totalStudyTimeSec`: その単語に費やした累計秒数
-- `isMastered`: Perfect を選択してマスター済みかどうか
 
 ### 学習ログ（レポート用）
 
@@ -1425,10 +1451,9 @@ Report画面では、FSRS内部の状態を以下のようにユーザー向け�
 
 | 表示状態 | 定義 |
 |---------|------|
-| `Mastered` | `isMastered === true` の単語 |
 | `Stable` | `state === 'Review'` かつ `scheduledDays >= 30` の単語 |
-| `Learning` | `state === 'Learning'` または `state === 'Relearning'` の単語 |
-| `New` | `state === 'New'` の単語 |
+| `Learning` | `state === 'Learning'` または `state === 'Relearning'` または `state === 'Review'` の単語 |
+| `New` | `state === 'New'` の単語（未学習） |
 
 **実装例:**
 
@@ -1439,18 +1464,18 @@ Report画面では、FSRS内部の状態を以下のようにユーザー向け�
 
 /**
  * 表示用の状態
- * @typedef {'Mastered' | 'Stable' | 'Learning' | 'New'} DisplayState
+ * @typedef {'Stable' | 'Learning' | 'New'} DisplayState
  */
 
 /**
  * FSRS の状態を表示用の状態に変換
- * @param {WordProgress} progress - 単語の進捗情報
+ * @param {WordProgress | null} progress - 単語の進捗情報（未学習の場合は null）
  * @returns {DisplayState} 表示用の状態
  */
 function getDisplayState(progress) {
-  // マスター済み
-  if (progress.isMastered) {
-    return 'Mastered';
+  // 未学習
+  if (!progress || progress.state === 'New') {
+    return 'New';
   }
 
   // 安定状態（長期記憶）
@@ -1459,12 +1484,7 @@ function getDisplayState(progress) {
   }
 
   // 学習中
-  if (progress.state === 'Learning' || progress.state === 'Relearning') {
-    return 'Learning';
-  }
-
-  // 未学習
-  return 'New';
+  return 'Learning';
 }
 ```
 
