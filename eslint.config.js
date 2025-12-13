@@ -22,6 +22,13 @@ export default [
 	},
 	{
 		files: ['**/*.svelte', '**/*.svelte.js'],
-		languageOptions: { parserOptions: { svelteConfig } }
+		languageOptions: { parserOptions: { svelteConfig } },
+		rules: {
+			// Allow static href links and goto() without resolve()
+			// These are used for simple internal navigation
+			'svelte/no-navigation-without-resolve': 'off',
+			// $effect with getStorageUsage() updates based on external changes
+			'svelte/prefer-writable-derived': 'off'
+		}
 	}
 ];
