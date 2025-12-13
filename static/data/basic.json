@@ -1,0 +1,140 @@
+[
+  {
+    "word": "unveil",
+    "pronunciation": "/ʌnˈveɪl/",
+    "katakana": "アンヴェイル",
+    "type": "verb",
+    "meaning": "発表する・公開する・お披露目する",
+    "contextMeaning": "（新しいサポートポートフォリオを）発表した",
+    "example": "The company unveiled a completely revamped support portfolio at the conference.",
+    "translation": "その会社はカンファレンスで完全に刷新されたサポートポートフォリオを発表した。"
+  },
+  {
+    "word": "significantly",
+    "pronunciation": "/sɪɡˈnɪfɪkəntli/",
+    "katakana": "シグニフィカントリー",
+    "type": "adverb",
+    "meaning": "大幅に・著しく・かなり",
+    "contextMeaning": "大幅に（より強力になる）",
+    "example": "The system becomes significantly stronger with new security features.",
+    "translation": "新しいセキュリティ機能により、システムは大幅に強力になる。",
+    "derivatives": [
+      {
+        "word": "significant",
+        "pronunciation": "/sɪɡˈnɪfɪkənt/",
+        "katakana": "シグニフィカント",
+        "type": "adjective",
+        "meaning": "重要な・大きな・著しい",
+        "example": "This is a significant improvement."
+      }
+    ]
+  },
+  {
+    "word": "synthetic",
+    "pronunciation": "/sɪnˈθetɪk/",
+    "katakana": "シンセティック",
+    "type": "adjective",
+    "meaning": "合成の・人工的な・合成された",
+    "contextMeaning": "合成の（データセット）",
+    "note": "実際のデータから統計的特性を学習して人工的に生成されたデータのことで、元のデータの統計的パターンは保持しながらも、個人を特定できないように作られたデータセットを表しています",
+    "example": "Generating synthetic datasets that preserve statistical patterns.",
+    "translation": "統計的パターンを保持する合成データセットを生成する。"
+  },
+  {
+    "word": "leverage",
+    "pronunciation": "/ˈlevərɪdʒ/",
+    "katakana": "レバレッジ",
+    "type": "verb",
+    "meaning": "活用する・利用する・てこ入れする",
+    "contextMeaning": "（既存のリソースを）活用する",
+    "example": "We can leverage existing infrastructure to reduce costs.",
+    "translation": "コストを削減するために既存のインフラを活用できます。"
+  },
+  {
+    "word": "comprehensive",
+    "pronunciation": "/ˌkɑːmprɪˈhensɪv/",
+    "katakana": "コンプリヘンシブ",
+    "type": "adjective",
+    "meaning": "包括的な・総合的な・広範な",
+    "contextMeaning": "包括的な（レポート）",
+    "example": "The team prepared a comprehensive analysis of the market.",
+    "translation": "チームは市場の包括的な分析を準備した。"
+  },
+  {
+    "word": "implement",
+    "pronunciation": "/ˈɪmplɪment/",
+    "katakana": "インプリメント",
+    "type": "verb",
+    "meaning": "実装する・実施する・導入する",
+    "contextMeaning": "（新機能を）実装する",
+    "example": "We need to implement the new feature by next week.",
+    "translation": "来週までに新機能を実装する必要があります。",
+    "derivatives": [
+      {
+        "word": "implementation",
+        "pronunciation": "/ˌɪmplɪmenˈteɪʃn/",
+        "katakana": "インプリメンテーション",
+        "type": "noun",
+        "meaning": "実装・実施・導入"
+      }
+    ]
+  },
+  {
+    "word": "efficient",
+    "pronunciation": "/ɪˈfɪʃnt/",
+    "katakana": "イフィシェント",
+    "type": "adjective",
+    "meaning": "効率的な・能率的な",
+    "contextMeaning": "効率的な（プロセス）",
+    "example": "This algorithm is more efficient than the previous one.",
+    "translation": "このアルゴリズムは前のものより効率的です。",
+    "derivatives": [
+      {
+        "word": "efficiency",
+        "pronunciation": "/ɪˈfɪʃnsi/",
+        "katakana": "イフィシェンシー",
+        "type": "noun",
+        "meaning": "効率・能率"
+      }
+    ]
+  },
+  {
+    "word": "optimize",
+    "pronunciation": "/ˈɑːptɪmaɪz/",
+    "katakana": "オプティマイズ",
+    "type": "verb",
+    "meaning": "最適化する・効率化する",
+    "contextMeaning": "（パフォーマンスを）最適化する",
+    "example": "We should optimize the database queries for better performance.",
+    "translation": "より良いパフォーマンスのためにデータベースクエリを最適化すべきです。"
+  },
+  {
+    "word": "integrate",
+    "pronunciation": "/ˈɪntɪɡreɪt/",
+    "katakana": "インテグレイト",
+    "type": "verb",
+    "meaning": "統合する・組み込む・一体化する",
+    "contextMeaning": "（システムを）統合する",
+    "example": "The new API allows you to integrate with external services.",
+    "translation": "新しいAPIにより外部サービスとの統合が可能になります。",
+    "derivatives": [
+      {
+        "word": "integration",
+        "pronunciation": "/ˌɪntɪˈɡreɪʃn/",
+        "katakana": "インテグレーション",
+        "type": "noun",
+        "meaning": "統合・一体化"
+      }
+    ]
+  },
+  {
+    "word": "scalable",
+    "pronunciation": "/ˈskeɪləbl/",
+    "katakana": "スケーラブル",
+    "type": "adjective",
+    "meaning": "拡張可能な・スケーラブルな",
+    "contextMeaning": "拡張可能な（アーキテクチャ）",
+    "example": "We need a scalable architecture to handle growing traffic.",
+    "translation": "増加するトラフィックに対応するためにスケーラブルなアーキテクチャが必要です。"
+  }
+]
