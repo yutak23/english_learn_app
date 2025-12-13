@@ -73,7 +73,13 @@
                 }
 
                 startSession();
-                startNewSet();
+
+                const setStarted = startNewSet();
+                if (!setStarted) {
+                        // Safety guard: if words become unavailable unexpectedly, end the session
+                        endSession();
+                        alert('No words are available to study. Please configure word files in Settings.');
+                }
         }
 
 	function handleStopSession() {
@@ -85,12 +91,15 @@
 		}
 	}
 
-	function startNewSet() {
-		if ($wordsStore.words.length === 0) return;
+        function startNewSet() {
+                if ($wordsStore.words.length === 0) {
+                        return false;
+                }
 
-		currentSet = studyQueue.createSet($wordsStore.words, $progressStore);
-		showNextWord();
-	}
+                currentSet = studyQueue.createSet($wordsStore.words, $progressStore);
+                showNextWord();
+                return true;
+        }
 
 	function showNextWord() {
 		if (!currentSet) return;
